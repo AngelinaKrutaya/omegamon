@@ -1,0 +1,99 @@
+*--------------------------------------------------------------------   00001000
+* DESCRIPTION:  OMEGAMON COMMAND LEVEL SECURITY OPTIONS                 00002000
+*                                                                       00003000
+* MEMBER NAME:  KOMSUPDI                                                00003100
+*                                                                       00003200
+* INSTRUCTIONS: 1. CHANGE THIS MEMBER ACCORDING TO THE SECURITY         00003300
+*                  OPTIONS YOU WANT AT YOUR SITE.                       00003400
+*               2. TO INSTALL THESE OPTIONS, RUN JOB KOMSUPD            00003500
+*                  IN RHILEV.RKANSAMU.                                  00003600
+*                                                                       00003700
+*--------------------------------------------------------------------   00003800
+* TO USE EXTERNAL SECURITY (ACF2, RACF, OR TOP-SECRET), UNCOMMENT THE   00003900
+* THE APPROPRIATE "MODULE=" STATEMENT BELOW.                            00004000
+*                                                                       00005000
+* FOR ACF2 UNCOMMENT THE FOLLOWING STATEMENT:                           00006000
+*      MODULE=KOMACF2X                                                  00007000
+*                                                                       00008000
+* FOR RACF OR TOP-SECRET UNCOMMENT THE FOLLOWING STATEMENT:             00009000
+       MODULE=KOMRACFX                                                  00010012
+*      MODULE=                                                          00011012
+*--------------------------------------------------------------------   00020000
+* AN AUTHORIZED SCREEN SPACE LIBRARY IS USED TO FETCH SCREEN SPACES     00030000
+* CONTAINING AUTHORIZED COMMANDS FOR EXECUTION AT OMEGAMON STARTUP.     00040000
+* TO USE AN AUTHLIB, UNCOMMENT THE FOLLOWING STATEMENT AND CHANGE       00050000
+* "RHILEV" AND "NOVOLUME" ACCORDINGLY.                                  00060000
+*                                                                       00070000
+*      AUTHLIB=RHILEV.RKOMPROC,VOL=NOVOLUME                             00080000
+*--------------------------------------------------------------------   00090000
+* THE FOLLOWING PASSWORD STATEMENTS DEFINE THE PASSWORD FOR EACH        00100000
+* AUTHORITY LEVEL (1,2,3).  EACH LEVEL MUST HAVE A UNIQUE PASSWORD.     00110000
+*                                                                       00120000
+* THE USER ENTERS PASSWORDS WITH THE /PWD INFO LINE COMMAND, AND THE    00130000
+* AUTHORITY LEVEL GETS SET ACCORDINGLY.  TO RESET A SESSION'S           00140000
+* AUTHORITY LEVEL TO ZERO, ENTER AN INVALID PASSWORD OR PRESS THE       00150000
+* PA1 KEY.                                                              00160000
+*                                                                       00161000
+       PASSWORD=OMEGAM1,LEVEL=1                                         00162000
+       PASSWORD=OMEGAM2,LEVEL=2                                         00163000
+       PASSWORD=OMEGAM3,LEVEL=3                                         00164000
+*--------------------------------------------------------------------   00165000
+* THE FOLLOWING STATEMENTS DEFINE THE AUTHORITY LEVEL REQUIRED FOR      00166000
+* VARIOUS COMMANDS AND THEIR MINORS.                                    00167000
+*                                                                       00168000
+* ACCESS TO MINOR COMMANDS IS GRANTED VIA THEIR MAJOR.  THERE IS NO     00169000
+* WAY OF ACCESSING A MINOR COMMAND UNLESS THE USER HAS ACCESS TO        00170000
+* ITS MAJOR. THEREFORE, IT IS UNNECESSARY TO PROTECT MINORS OF          00180000
+* PROTECTED MAJORS UNLESS THE MINORS REQUIRE A HIGHER AUTHORITY LEVEL   00190000
+* THAN THEIR ASSOCIATED MAJOR.                                          00200000
+*                                                                       00210000
+       COMMAND=APFU,LEVEL=3                                             00220000
+       COMMAND=CONS,LEVEL=3                                             00230000
+       COMMAND=CONU,LEVEL=3                                             00240000
+       COMMAND=CSAF,LEVEL=3                                             00250000
+       COMMAND=FNDU,LEVEL=3                                             00260000
+       COMMAND=KILL,LEVEL=3,EXTERNAL=YES                                00270005
+       COMMAND=LPAM,LEVEL=3                                             00280000
+       COMMAND=MCHN,LEVEL=3                                             00290000
+       COMMAND=MDEF,LEVEL=3                                             00300000
+       COMMAND=MLST,LEVEL=3                                             00310000
+       COMMAND=MSCN,LEVEL=3                                             00320000
+       COMMAND=MZAP,LEVEL=3                                             00330000
+       COMMAND=OCMD,LEVEL=3                                             00340000
+       COMMAND=RCMD,LEVEL=3                                             00350000
+       COMMAND=OSPC,LEVEL=3                                             00360000
+       COMMAND=PEEK,LEVEL=3                                             00370000
+       COMMAND=QLLA,LEVEL=3                                             00380000
+       COMMAND=SCHN,LEVEL=3                                             00390000
+       COMMAND=SLST,LEVEL=3                                             00400000
+       COMMAND=SSCN,LEVEL=3                                             00410000
+       COMMAND=SZAP,LEVEL=3                                             00420000
+       COMMAND=XMCH,LEVEL=3                                             00430000
+       COMMAND=XMLS,LEVEL=3                                             00440000
+       COMMAND=XMSC,LEVEL=3                                             00450000
+       COMMAND=XMZP,LEVEL=3                                             00460000
+       COMMAND=.DSA,LEVEL=3                                             00470000
+*---------------------------------------------------------------------  00480000
+* THESE MINORS ARE PROTECTED WITH A LEVEL HIGHER THAN THEIR MAJOR:      00490000
+*                                                                       00500000
+       MINOR=ALIB,LEVEL=3   (MINOR OF THE SYS COMMAND)                  00510000
+       MINOR=ALI,LEVEL=3    (MINOR OF THE SYS COMMAND)                  00520000
+       MINOR=MCTL,LEVEL=3   (MINOR OF THE JOBN COMMAND)                 00530000
+*---------------------------------------------------------------------  00540000
+* THE FOLLOWING MINORS APPLY TO THE FOLLOWING COMMANDS:                 00550000
+*                                                                       00560000
+* ALLJ BATJ BATL BATX BCPU BIO  BSWP BWAT JAS  JAS# JCPU JDM  JLSW      00570000
+* JOBN JPAG JPR  JP1  JP2  JP3  JP4  JP5  JP6  JP7  JP8  JP9  JRES      00580000
+* JSNA JSNC JSWP STCJ STCL TPD# TSLG TSOD TSOJ TSOL TSOX                00590000
+*                                                                       00600000
+       MINOR=CHAP,LEVEL=3                                               00610000
+       MINOR=MNSW,LEVEL=3                                               00620000
+       MINOR=MSWP,LEVEL=3                                               00630000
+       MINOR=SWPI,LEVEL=3                                               00640000
+       MINOR=SWPO,LEVEL=3                                               00650000
+       MINOR=TADR,LEVEL=3                                               00660000
+       MINOR=TSNM,LEVEL=3                                               00670000
+*---------------------------------------------------------------------  00680000
+* PRODUCE A FULL OUTPUT LISTING WHEN KOMSUPD IS RUN.                    00690000
+*                                                                       00700000
+       LIST=YES                                                         00710000

@@ -1,0 +1,62 @@
+/*------------------------------------------------------------------*/
+/* Licensed Materials - Property of IBM                             */
+/* 5698-B49, 5698-A33, 5698-A34, 5698-A37, 5655-W37,                */
+/* 5655-W38                                                         */
+/* * Copyright Rocket Software Inc. 2019 All rights reserved *      */
+/* Copyright IBM Corporation 2019.  All rights reserved             */
+/*                                                                  */
+/* US Government Users Restricted Rights - Use, duplication or      */
+/* disclosure restricted by GSA ADP Schedule Contract with IBM Corp.*/
+/*-------------------------- UA69205 -------------------------------*/
+/*  YYYY-MM-DD WHO FLG Description                                  */
+/*  ---------- --- --- ---------------------------------------------*/
+/*  2019-07-31 MC      Initial development                          */
+/*                        (APAR# OA57511)                           */
+/*                                                                  */
+/********************************************************************/
+/*                                                                  */
+/* GROUP DEFINITIONS                                                */
+/*                                                                  */
+/* This PDS member is provided in a runtime and/or SMP/E target     */
+/* dataset, &rhilev.&rte.RKOBDATF pointed to by the RKOBPROF DD     */
+/* statement in the Enhanced 3270UI started task JCL proc.          */
+/* Do not modify this PDS member in the xKOBDATF Dataset. It        */
+/* should be copied to the &rhilev.&rte.UKOBDATF dataset for        */
+/* modification.                                                    */
+/*                                                                  */
+/* This PDS member defines the e3720UI multi-tenancy user groups.   */
+/* You may define up to 100 groups, each with a unique Group ID     */
+/* For each Group, you can specify the desired first workspace to   */
+/* display at session logon. If the first workspace is a tabbed     */
+/* dialog, you can specify a display option for each tab; Y or N.   */
+/*                                                                  */
+/* The groups shown below are just examples; you may create your own*/
+/*                                                                  */
+/********************************************************************/
+
+GROUP:OMEGALL,FIRSTWS=KOBSEVTS,
+SHOWEVT=Y,SHOWZOS=Y,SHOWCICS=Y,SHOWCTG=Y,SHOWIMS=Y,
+SHOWDB2=Y,SHOWMQ=Y,SHOWMFN=Y,SHOWSTOR=Y,SHOWJAVA=Y
+
+GROUP:OMEGZOS,FIRSTWS=KOBSZOS,
+SHOWEVT=Y,SHOWZOS=Y,SHOWCICS=N,SHOWCTG=N,SHOWIMS=N,
+SHOWDB2=N,SHOWMQ=Y,SHOWMFN=Y,SHOWSTOR=Y,SHOWJAVA=Y
+
+GROUP:OMEGCICS,FIRSTWS=KOBSCICS,
+SHOWEVT=N,SHOWZOS=Y,SHOWCICS=Y,SHOWCTG=Y,SHOWIMS=N,
+SHOWDB2=N,SHOWMQ=Y,SHOWMFN=N,SHOWSTOR=N,SHOWJAVA=Y
+
+GROUP:OMEGIMS,FIRSTWS=KOBSIMS,
+SHOWEVT=N,SHOWZOS=Y,SHOWCICS=N,SHOWCTG=N,SHOWIMS=Y,
+SHOWDB2=N,SHOWMQ=Y,SHOWMFN=N,SHOWSTOR=N,SHOWJAVA=Y
+
+GROUP:OMEGDB2,FIRSTWS=KOBSDB2,
+SHOWEVT=N,SHOWZOS=Y,SHOWCICS=N,SHOWCTG=N,SHOWIMS=Y,
+SHOWDB2=Y,SHOWMQ=Y,SHOWMFN=N,SHOWSTOR=N,SHOWJAVA=Y
+
+GROUP:TDB2,FIRSTWS=KOBSEVTS,
+SHOWEVT=N,SHOWZOS=Y,SHOWCICS=N,SHOWCTG=N,SHOWIMS=Y,
+SHOWDB2=Y,SHOWMQ=Y,SHOWMFN=N,SHOWSTOR=N,SHOWJAVA=Y
+/********************************************************************/
+/*          END OF DEFINITIONS                                      */
+/********************************************************************/

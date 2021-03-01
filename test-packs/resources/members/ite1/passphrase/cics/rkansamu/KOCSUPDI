@@ -1,0 +1,90 @@
+*      O M E G A M O N  --   --  SECURITY INSTALLATION                *
+*---------------------------------------------------------------------*
+* ******************************************************************* *
+* SPECIAL NOTES:                                                      *
+*            (1) WHEN THIS MODULE IS UPDATED.  SECURITY SHOULD BE     *
+*                REINSTALLED IN EACH RUNTIME ENVIRONMENT.             *
+*            (2) THIS IS NOT ASSEMBLER CODE.  THE SECURITY MODULE     *
+*                WILL BE FILE TAILORED BY ISPF.  DO NOT ADD SPECIAL   *
+*                CHARACTERS THAT WILL CAUSE FILE TAILORING ERRORS.    *
+* ******************************************************************* *
+*---------------------------------------------------------------------*
+*      TO CUSTOMIZE OMEGAMON SECURITY, READ THE COMMENTS BELOW AND    *
+*      FOLLOW THE INSTRUCTIONS.  REFER TO THE "IBM Tivoli OMEGAMON II *
+*      for CICS CUSTOMIZATION GUIDE" FOR MORE INFORMATION.            *
+*---------------------------------------------------------------------*
+*
+      RESET=ALL
+*
+*---------------------------------------------------------------------*
+*        TO USE EXTERNAL SECURITY, SPECIFY THE MODULE NAME AFTER      *
+*        MODULE= BELOW.  THE NAME MUST CONFORM TO z/OS NAMING         *
+*        CONVENTIONS FOR LOAD MODULES.                                *
+*                                                                     *
+*        TO USE OMEGAMON SECURITY ONLY, LEAVE MODULE= BLANK.          *
+*---------------------------------------------------------------------*
+      MODULE=
+*
+*---------------------------------------------------------------------*
+*        TO USE SMF AUDITING FOR SELECTED COMMANDS, SPECIFY AN SMF    *
+*        RECORD ID NUMBER BETWEEN 128 AND 255 (INCLUSIVE).  MAKE      *
+*        SURE THAT OMEGAMON IS THE ONLY APPLICATION USING THIS SMF    *
+*        RECORD ID NUMBER.  ALSO, MAKE SURE THAT THE SMF RECORD       *
+*        EXITS (IEFU83 AND IEFU84) AND THE SMF SYSTEM PARAMETERS      *
+*        SPECIFICATIONS (SMFPRMCC) DO NOT SUPPRESS OMEGAMON'S         *
+*        ABILITY TO JOURNAL THE AUDIT ACTIVITY RECORDS.               *
+*---------------------------------------------------------------------*
+*
+      SMFNUM=
+*
+*---------------------------------------------------------------------*
+*        THE AUTHORIZED SCREEN SPACE LIBRARY IS USED TO FETCH         *
+*        SCREEN SPACES CONTAINING AUTHORIZED COMMANDS FOR             *
+*        EXECUTION AT OMEGAMON INITIALIZATION.                        *
+*            ------ DO NOT MODIFY THIS STATEMENT -----                *
+*---------------------------------------------------------------------*
+      AUTHLIB=&XDSN2.KOCPROC,VOL=NOVOLUME
+*
+*---------------------------------------------------------------------*
+*        LISTED BELOW ARE THE DEFAULT PASSWORDS:  CANDLE1, CANDLE2,   *
+*        CANDLE3.  TO CHANGE THE PASSWORDS, TYPE OVER THE DEFAULTS.   *
+*---------------------------------------------------------------------*
+       PASSWORD=CANDLE1,LEVEL=1
+       PASSWORD=CANDLE2,LEVEL=2
+       PASSWORD=CANDLE3,LEVEL=3
+*
+*---------------------------------------------------------------------*
+*        SPECIFY THE SECURITY LEVEL FOR EACH COMMAND BELOW.           *
+*---------------------------------------------------------------------*
+     COMMAND=AIDK,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=CICM,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=CMT,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=CONS,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=CONU,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=CSWP,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=ICEK,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=KILL,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=MCHN,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=MDEF,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=MLST,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=MSCN,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=MZAP,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=OCMD,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=SLST,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=SSCN,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=SZAP,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=TASK,LEVEL=3,EXTERNAL=YES,AUDIT=NO
+     COMMAND=TDDL,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=TSQD,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=TRKU,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=XMCH,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=XMLS,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=XMSC,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+     COMMAND=XMZP,LEVEL=3,EXTERNAL=NO,AUDIT=NO
+*
+*
+*---------------------------------------------------------------------*
+*    PRODUCE A LISTING WHEN SECURITY IS APPLIED.                      *
+*---------------------------------------------------------------------*
+*
+LIST=YES

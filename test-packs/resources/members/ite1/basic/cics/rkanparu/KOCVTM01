@@ -1,0 +1,39 @@
+*
+*     START OBVTAM - NEEDED FOR VTAM, TSO, AND ISPF MODES
+*
+*     KEYWORD         DESCRIPTION
+*    -----------------------------------------------------------------
+*     APPL=XXXXXXXX   VTAM APPLID USED TO OPEN THE ACB.
+*  *  LROWS=N         NUMBER OF LOGICAL LROWS.
+*     MODE=XXX        MUST BE "IC1" FOR OBVTAM SUBTASK.
+*     OM=KOCCICS      NAME OF PROGRAM TO ATTACH.
+*                     MUST BE "KOCCICS" FOR OMEGAMON II FOR CICS.
+*  *  UMAX=N          MAXIMUM NUMBER OF CONCURRENT USERS.
+*  *  USER=XX         USER PROFILE SUFFIX
+*  *  AUP=XXX         SPECIFIES WHETHER (YES) OR NOT (NO, THE DEFAULT)
+*                     AUTOMATIC UPDATE MODE IS ENABLED
+*  *  PRTCT=XXXXXXXX  SPECIFIES AN APPLID PASSWORD REQUIRED FOR SIGNING
+*                     ON TO VTAM.
+*  *  PSWD=XXXXXXXX   SPECIFIES A PASSWORD REQUIRED FOR LOGGING ON TO
+*                     THE OMVTAM SUBTASK.
+*
+*  *  FOLD=X          SPECIFIES WHETHER (Y, THE DEFAULT) OR NOT (N)
+*                     THE PASSWORD FOR SIGNING ON TO VTAM SHOULD BE
+*                     FOLDED TO UPPERCASE.
+*
+*  *  TIMEOUT=NN      THE TIMEOUT VALUE ESTABLISHES THE LENGTH OF TIME
+*                     THAT A VTAM MODE SESSION WILL BE PERMITTED TO
+*                     REMAIN IDLE BEFORE THE SESSION IS CANCELLED BY
+*                     OBVTAM.  THE TIMEOUT VALUE IS IN MINUTES, AND 0
+*                     INDICATES THAT THE SESSION WILL NOT BE TIMED OUT.
+*
+*  *  OPTIONAL KEYWORDS; THE REST ARE REQUIRED
+*
+ START OBVTAM APPL=ITE1OC0,                                            X
+              LROWS=99,                                                X
+              OM=KOCCICS,                                              X
+              CICS=*,                                                  X
+              UMAX=99,                                                 X
+              FOLD=Y,                                                  X
+              USER=/I,                                                 X
+              MODE=IC1

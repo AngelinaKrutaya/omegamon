@@ -1,0 +1,17 @@
+<org.eclipse.jubula.communication.internal.message.ChangeAUTModeMessage>
+    <m__messageId>
+        <m__sequenceNumber>{{message_number}}</m__sequenceNumber>
+        <m__timestamp>{{message_timestamp}}</m__timestamp>
+    </m__messageId>
+    <m__mode>{{mode}}</m__mode>
+    <m__keyModifier>{{key_modifier}}</m__keyModifier>
+    <m__key>{{key}}</m__key>
+    <m__mouseButton>{{mouse_button}}</m__mouseButton>
+    <m__key2Modifier>0</m__key2Modifier>
+    <m__key2>0</m__key2>
+    <m__checkModeKeyModifier>0</m__checkModeKeyModifier>
+    <m__checkModeKey>0</m__checkModeKey>
+    <m__checkCompKeyModifier>0</m__checkCompKeyModifier>
+    <m__checkCompKey>0</m__checkCompKey>
+    <m__dialogOpen>false</m__dialogOpen>
+</org.eclipse.jubula.communication.internal.message.ChangeAUTModeMessage>

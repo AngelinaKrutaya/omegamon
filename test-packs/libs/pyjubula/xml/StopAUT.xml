@@ -1,0 +1,9 @@
+<org.eclipse.jubula.communication.internal.message.StopAUTServerMessage>
+    <m__messageId>
+        <m__sequenceNumber>{{message_number}}</m__sequenceNumber>
+        <m__timestamp>{{message_timestamp}}</m__timestamp>
+    </m__messageId>
+    <m__autId>
+        <m__executableName>{{aut_id}}</m__executableName>
+    </m__autId>
+</org.eclipse.jubula.communication.internal.message.StopAUTServerMessage>

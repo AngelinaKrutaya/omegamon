@@ -1,0 +1,6 @@
+<org.eclipse.jubula.communication.internal.message.MessageHeader>
+    <m__version>1</m__version>
+    <m__messageType>{{message_type}}</m__messageType>
+    <m__messageClassName>{{message_class}}</m__messageClassName>
+    <m__messageLength>{{message_length}}</m__messageLength>
+</org.eclipse.jubula.communication.internal.message.MessageHeader>

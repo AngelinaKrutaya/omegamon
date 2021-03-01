@@ -1,0 +1,91 @@
+*      O M E G A M O N  --   --  SECURITY INSTALLATION                * 00010000
+*                                                                     * 00020000
+*---------------------------------------------------------------------* 00030000
+*---------------------------------------------------------------------* 00040000
+*        SAMPLE JCL TO INSTALL THESE SECURITY OPTIONS MAY BE FOUND IN * 00050000
+*        DATASET 'RHILEV.RKD2SAM' (MEMBER NAME 'KO2SUPD').            * 00060000
+*        NO ASSEMBLY OR LINK-EDITING IS REQUIRED, AS ONLY CONTROL     * 00070000
+*        STATEMENT INPUT IS PROCESSED.                                * 00080000
+*---------------------------------------------------------------------* 00090000
+*---------------------------------------------------------------------* 00100000
+*                                                                       00110000
+*---------------------------------------------------------------------* 00120000
+*        THE NAME OF THE EXTERNAL SECURITY MODULE MUST BE SPECIFIED   * 00130000
+*        EXPLICITLY; THERE IS NO DEFAULT.  THE NAME MUST CONFORM TO   * 00140000
+*        MVS NAMING CONVENTIONS FOR LOAD MODULES.                     * 00150000
+*---------------------------------------------------------------------* 00160000
+*     MODULE=KO2RACFX                                                   00170014
+      MODULE=                                                           00171014
+*                                                                       00180000
+*---------------------------------------------------------------------* 00190000
+*        IF SMF AUDITING OF SELECTED COMMANDS IS DESIRED, A VALID     * 00200000
+*        SMF RECORD ID NUMBER BETWEEN 128 AND 255 (INCLUSIVE) MUST    * 00210000
+*        BE SPECIFIED.  ENSURE THAT OMEGAMON IS THE ONLY APPLICATION  * 00220000
+*        USING THIS SMF RECORD ID NUMBER.  ALSO, ENSURE THAT THE SMF  * 00230000
+*        RECORD EXITS (IEFU83 AND IEFU84) AND THE SMF SYSTEM PARMS    * 00240000
+*        SPECIFICATIONS (SMFPRMXX) DO NOT SUPPRESS THE SPECIFIED SMF  * 00250000
+*        RECORD ID NUMBER.                                            * 00260000
+*---------------------------------------------------------------------* 00270000
+      SMFNUM=                                                           00280000
+*                                                                       00290000
+*---------------------------------------------------------------------* 00300000
+*        THE 'AUTHORIZED SCREEN SPACE LIBRARY' IS USED TO FETCH       * 00310000
+*        SCREEN SPACES CONTAINING AUTHORIZED COMMANDS FOR             * 00320000
+*        EXECUTION AT OMEGAMON INITIALIZATION.                        * 00330000
+*---------------------------------------------------------------------* 00340000
+      AUTHLIB=RHILEV.RKO2PROC,VOL=NOVOLUME                              00350000
+*                                                                       00360000
+*---------------------------------------------------------------------* 00370000
+*        THE PASSWORD IS ENTERED BY USING THE /PWD INFO LINE COMMAND. * 00380000
+*        AN AUTHORITY LEVEL IS SET TO THE CORRESPONDING PASSWORD. TO  * 00390000
+*        CLEAR THE AUTHORITY LEVEL TO ZERO, USE PA1, ENTER AN INVALID * 00400000
+*        PASSWORD, OR ENTER A PASSWORD OF BLANK(S).                   * 00410000
+*---------------------------------------------------------------------* 00420000
+       PASSWORD=IBM1,LEVEL=1                                            00430001
+       PASSWORD=IBM2,LEVEL=2                                            00440001
+       PASSWORD=IBM3,LEVEL=3                                            00450001
+*                                                                       00460000
+*---------------------------------------------------------------------* 00470000
+*        THE FOLLOWING STATEMENTS DEFINE THE AUTHORITY (PASSWORD)     * 00480000
+*        LEVEL REQUIRED TO EXECUTE THE VARIOUS COMMANDS AND           * 00490000
+*        THEIR MINORS                                                 * 00500000
+*                                                                     * 00510000
+*        COMMAND AUTHORIZATION LEVELS ARE THE SAME AS THEY WERE       * 00520000
+*        IN PREVIOUS RELEASES, WITH THE ADDITION OF ANY NEW           * 00530000
+*        AUTHORIZED COMMANDS.                                         * 00540000
+*                                                                     * 00550000
+*      ACCESS TO MINOR COMMANDS IS GRANTED VIA THEIR MAJOR.           * 00560000
+*      THERE IS NO WAY OF ACCESSING A COMMAND'S MINORS                * 00570000
+*      UNLESS THE USER HAS ACCESS TO ITS MAJOR. THEREFORE, IT         * 00580000
+*      IS UNNECESSARY TO PROTECT MINORS OF PROTECTED MAJORS           * 00590000
+*      UNLESS THE MINORS ARE TO HAVE A HIGHER PROTECTION              * 00600000
+*      LEVEL THAN THEIR ASSOCIATED MAJOR.                             * 00610000
+*---------------------------------------------------------------------* 00620000
+     COMMAND=CONS,LEVEL=3                                               00630000
+     COMMAND=DCMD,LEVEL=3                                               00640000
+     COMMAND=DCNS,LEVEL=3                                               00650000
+     COMMAND=MCHN,LEVEL=3                                               00660000
+     COMMAND=MLST,LEVEL=3                                               00670000
+     COMMAND=MSCN,LEVEL=3                                               00680000
+     COMMAND=MZAP,LEVEL=3                                               00690000
+     COMMAND=OCMD,LEVEL=3                                               00700000
+     COMMAND=OJIN,LEVEL=3                                               00710000
+     COMMAND=OJTM,LEVEL=3                                               00720000
+     COMMAND=PEEK,LEVEL=3                                               00730012
+     COMMAND=XMCH,LEVEL=3                                               00740000
+     COMMAND=XMLS,LEVEL=3                                               00750000
+     COMMAND=XMSC,LEVEL=3                                               00760000
+     COMMAND=XMZP,LEVEL=3                                               00770000
+     COMMAND=.DSA,LEVEL=3                                               00780000
+     COMMAND=OSPC,LEVEL=3                                               00790000
+     COMMAND=SCHN,LEVEL=3                                               00800000
+     COMMAND=SLST,LEVEL=3                                               00810000
+     COMMAND=SSCN,LEVEL=3                                               00820000
+     COMMAND=SZAP,LEVEL=3                                               00830003
+     MINOR=TCMD,LEVEL=3                                                 00840000
+*                                                                       00850000
+*---------------------------------------------------------------------* 00860000
+*    PRODUCE A FULL LISTING                                           * 00870000
+*---------------------------------------------------------------------* 00880000
+*                                                                       00890000
+LIST=YES                                                                00900000

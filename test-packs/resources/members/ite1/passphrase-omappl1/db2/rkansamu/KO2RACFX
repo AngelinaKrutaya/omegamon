@@ -1,0 +1,1012 @@
+URACF    TITLE 'RACF VALIDATION CHECK FOR OMEGAMON'                     00010001
+*                                                               *   @18 00020001
+*****************************************************************   @18 00030001
+* LICENSED MATERIALS - PROPERTY OF IBM                          *   @18 00040001
+* 5698-A59                                                      *   @18 00050001
+* (C) COPYRIGHT IBM CORPORATION 2005.  ALL RIGHTS RESERVED.     *   @18 00060001
+*                                                               *   @18 00070001
+* US GOVERNMENT USERS RESTRICTED RIGHTS - USE, DUPLICATION OR   *   @18 00080001
+* DISCLOSURE RESTRICTED BY GSA ADP SCHEDULE CONTRACT WITH       *   @18 00090001
+* IBM CORP.                                                     *   @18 00100001
+*****************************************************************   @18 00110001
+*                                                                       00120001
+*****************************************************************       00130001
+*  URACF -  OMEGAMON/RACF INTERFACE FOR EXTERNAL SECURITY       *       00140001
+*           CHECKING AND VTAM LOGON                             *       00150001
+*                                                               *       00160001
+*                                                               *       00170001
+*  ON ENTRY: R15 - ADDRESS OF OM$URACF (BASE REG)               *       00180001
+*            R13 - SAVE AREA                                    *       00190001
+*            R14 - RETURN ADDRESS                               *       00200001
+*            R1  - PARM                                         *       00210001
+*                  +00 - $UCHECK WORKAREA                       *       00220001
+*                                                               *       00230001
+*  URACF LOGIC:                                                 *   @07 00240001
+*                                                               *       00250001
+*           PHASE 1) - IF OMVTAM, VALIDATE USERID AND PASSWORD  *       00260001
+*           PHASE 2) - ALL MODES, SET INTERNAL SECURITY LEVEL   *       00270001
+*           PHASE 3) - RELOGON (VIA /PWD) VALIDATION OF BOTH    *   @07 00280001
+*                        USERID AND PASSWORD.                   *   @07 00290001
+*           PHASE 4) - ALL MODES, VALIDATE OMEGAMON COMMANDS    *   @07 00300001
+*                                                               *       00310001
+*           OMEGAMON MUST BE APF AUTHORIZED TO PROCESS          *       00320001
+*           THE FOLLOWING:                                      *       00330001
+*                                                               *       00340001
+*           1) VALIDATION OF USERID AND PASSWORD FOR VTAM MODE  *       00350001
+*              AND FOR RELOGON                                  *   @07 00360001
+*  NOTE:                                                        *       00370001
+*           THIS CODE IS AN EXAMPLE OF A WORKING EXIT           *   @18 00380001
+*           THAT SHOULD BE USED AS A STARTING POINT.            *       00390001
+*           REFER TO YOUR RACF PROGRAMMERS GUIDE AND RACROUTE   *   @18 00400001
+*           MACRO REFERENCE FOR ADDITIONAL INFORMATION.         *   @18 00410001
+*                                                               *       00420001
+*  WARNING:                                                     *       00430001
+*           THE (E)SPIE AND MODESET MACROS MUST NOT BE ISSUED   *       00440001
+*           FROM THIS EXIT.                                     *       00450001
+*****************************************************************       00460001
+*                                                               *       00470001
+* CHANGE-ACTIVITY =                                             *       00470101
+*                                                               *       00470201
+* $MOD(KO2RACFX,COMP(D2),PROD(DB2OM):                           *       00470301
+*                                                               *       00470401
+* CODE REASON  RLSE DATE   ORIGIN COMMENTS                      *       00470501
+* ---- ------- ---- ------ ------ ----------------------------- *       00470601
+* $19  PK19464 310  060410 IVAN:  PROBLEM WITH RACF EXIT        *       00470701
+*                                 ROUTINE RACROUTE MACRO.       *       00470801
+* $20  PK30099 310  061110 IVAN:  ABEND0C4 IN KOBVTAM MODULE    *       00470901
+* $21  PK68647 410  080907 VAD:   ABEND0C1 IF RACF RC > X'24'   *       00471001
+*---------------------------------------------------------------*       00472001
+*  CHANGE LOG:                                                  *       00473001
+*                                                               *       00474001
+*  @01 - ENSURE MESSAGE AREA BEGINS AS BLANKS.  2/14/86  DFF    *       00475001
+*  @02 - CHANGE RESOURCE CLASS NAME FROM        5/29/86  DFF    *       00476001
+*        OMCANDLE TO $$OMCAN SO THAT NO WARNING                 *       00477001
+*        MNOTE IS RECEIVED WHEN ASSEMBLING URACF                *       00478001
+*        EXIT.  THIS CHANGE IS OPTIONAL SINCE                   *       00479001
+*        RACF V1 R7 ONLY SUGGESTS THAT USER'S                   *       00480001
+*        RESOURCE CLASS NAMES SHOULD HAVE AT                    *       00490001
+*        LEAST ONE NON-ALPHABETIC CHARACTER AS                  *       00500001
+*        ONE OF THE FIRST FOUR CHARACTERS OF THE                *       00510001
+*        RESOURCE CLASS NAME.                                   *       00520001
+*  @03 - ADD WARNING ABOUT 512-BYTE MAXIMUM FOR SIZE OF         *       00530001
+*        OMUCHECK WORK AREA.                    05/05/87  DFF   *       00540001
+*  @04 - ADD LENGTH INDICATOR FOR U#CHMSG (OB220)               *       00550001
+*                                               10/30/87  ASG   *       00560001
+*  @05 - ADJUST DATE FOR MECHANICAL CHECK       12/14/87  BLG   *       00570001
+*  @06 - ADD SUPPORT FOR REPEAT INFO CALLS      01/12/88  ASG   *       00580001
+*  @07 - ADD SUPPORT FOR RELOGON                01/12/88  DFF   *       00590001
+*  @08 - ADD RETURN CODE AND MSG FOR RACINIT    01/15/88  DFF   *       00600001
+*  @09 - CHANGE RACSTAT CHECK SO THAT LOGON IS                  *       00610001
+*        NOT ALLOWED IF RACF IS NOT ACTIVE.     01/15/88  DFF   *       00620001
+*  @10 - ADD LOG=NONE KEYWORD TO SUPPRESS                       *       00630001
+*        SUPERFLUOUS RACF MESSAGES.             02/09/88  DFF   *       00640001
+*  @11 - MORE COMMENTS                          03/04/88  DFF   *       00650001
+*  @12 - PROVIDE $BIA/$PIA USAGE EXAMPLE        03/09/88  ASG   *       00660001
+*  @13 - ALLOW MAX. LENGTH FOR RESOURCE         05/13/88  DFF   *       00670001
+*  @14 - SEPARATE FIELD FOR RELOGON'S RET CODE  04/19/89  DFF   *       00680001
+*  @14A - ADD O2PIA DSECT                       09/01/92        *       00690001
+*  @15 - ADDED 'COPY KOBGMAC' STATEMENT.        10/01/92  AG    *       00700001
+*  @16 - FORCE RESOURCE CLASS TO 8 CHARS        09/30/94  DAG   *       00710001
+*  @17 - CHANGE EXIT4 TO EXIT4A FOR MESSAGES    10/02/96  DAG   *       00720001
+*        (CH#OM750225)                                          *       00730001
+*  @18 - CONVERT SECURITY EXIT TO USE RACROUTE  06/21/05  KJK   *       00740001
+*        MACRO CALLS WHICH SUPPORTS DYNAMIC                     *       00750001
+*        RESOURCE CLASSES IN THE CLASS DESCRIPTOR               *       00760001
+*        TABLE(CDT). (APAR OA12619 PTF UA20346)                 *       00770001
+*****************************************************************       00780001
+         COPY  KOBGMAC                                              @15 00790001
+*                                                                   @15 00800001
+OM$URACF START 0                                                        00810001
+         SAVE  (14,12),,OM$URACF---&SYSDATE-&SYSTIME                @05 00820001
+         LR    RC,RF              SET BASE REGISTER                     00830001
+         LA    RB,2048(,RC)       SET 2ND BASE REGISTER             @18 00840001
+         LA    RB,2048(,RB)       IN CASE IT IS NEEDED              @18 00850001
+         USING OM$URACF,RC,RB     MAP OUR CODE - 2 BASES            @18 00860001
+         L     R2,0(R1)            GET PASSED PARAMS                    00870001
+         ST    RD,4(R2)            CHAIN THEM                           00880001
+         ST    R2,8(RD)            MORE CHAIN                           00890001
+         LR    RD,R2               A NEW SAVE AREA                      00900001
+         USING $UCHECK,RD                                               00910001
+         MVI   U#CHMSG,C' '        CLEAR MESSAGE AREA               @01 00920001
+         MVC   U#CHMSG+1(L'U#CHMSG-1),U#CHMSG   WITH BLANKS         @01 00930001
+*                                                                   @18 00940001
+*        ALLOCATE A WORKAREA FOR RACROUTE IF NOT ALREADY OBTAINED   @18 00950001
+*                                                                   @18 00960001
+         CLC   M#RRWAI,RRWAICAT    DO WE HAVE AN EYECATCHER?        @18 00970001
+         BE    GOTMAIN             YES, ALREADY GOT STORAGE         @18 00980001
+         LA    R2,M@RRWAL          PREP THE LENGTH                  @18 00990001
+         GETMAIN RU,LV=(R2),LOC=(RES,31)   REQUEST STORAGE          @18 01000001
+         LTR   RF,RF               DID WE GET OUR STORAGE?          @18 01010001
+         BNZ   NORRWA              NO, EXIT WITH ERROR MSG          @18 01020001
+         ST    R1,M#RRWA           KEEP A COPY IN OUR DATA AREA     @18 01030001
+         MVC   M#RRWAI,RRWAICAT    MOVE IN EYECATCHER STRING        @18 01040001
+         B     GOTMAIN             AND CONTINUE ON ...              @18 01050001
+*                                                                   @18 01060001
+*        COULD NOT OBTAIN STORAGE - EXIT WITH MSG                   @18 01070001
+*                                                                   @18 01080001
+NORRWA   DS    0H                                                   @18 01090001
+         MVI   U#CHMSGL+1,L'MSG46             LENGTH OF MESSAGE     @18 01100001
+         MVC   U#CHMSG(L'MSG46),MSG46         INSERT MESSAGE TEXT   @18 01110001
+         B     EXIT4A                                               @18 01120001
+GOTMAIN  DS    0H                  HAVE STORAGE                     @18 01130001
+         L     RA,M#RRWA           LOAD OUR WORKAREA POINTER        @18 01140001
+*                                                                   @11 01150001
+*        THE RESOURCE CLASS NAME OF $$OMCAN OR OMCANDLE IS A        @11 01160001
+*        SUGGESTION ONLY AND NOT ENFORCED.  YOU MAY NAME THE        @11 01170001
+*        RESOURCE CLASS ANYTHING YOU WISH.  IN FACT, YOU MAY WANT   @11 01180001
+*        TO VARY THE RESOURCE CLASS NAME DEPENDING ON THE OMEGAMON  @11 01190001
+*        PRODUCT INSTALLED; THAT IS, OICANDLE OR $$OICAN FOR        @11 01200001
+*        OMEGAMON/IMS AND OCCANDLE OR $$OCCAN FOR OMEGAMON/CICS.    @11 01210001
+*        IT MUST BE 8 CHARACTERS (PADDED WITH BLANKS IF NECCESSARY) @16 01220001
+*                                                                   @11 01230001
+         MVC   U#CHCLSD,=CL8'OMCANDLE'    RESOURCE CLASS NAME       @18 01240006
+*        MVC   U#CHCLSD,=CL8'$KOMSEC'     RESOURCE CLASS NAME       @18 01241006
+*                                                                   @18 01250001
+         MVI   M#SW1,0             RESET MY SWITCH                      01260001
+         OI    U#CHAUT1,U@CH1RAC   SET SECURITY SYSTEM TO RACF          01270001
+*                                                                   @12 01280001
+*        THE BASE INFORMATION AREA AND PRODUCT INFORMATION AREA     @12 01290001
+*        CONTAIN ADDITIONAL DATA YOU MAY WANT TO USE IN VALIDATING  @12 01300001
+*        SECURITY ACCESS.  FOR EXAMPLE, IF YOU WANTED TO PREVENT    @12 01310001
+*        THE USE OF OMEGAMON IN VTAM ('VTM') MODE, THE FOLLOWING    @12 01320001
+*        CODE COULD BE USED...                                      @12 01330001
+*                                                                   @12 01340001
+*        L     R7,U#CHBIA          POINT TO BASE INFO AREA          @12 01350001
+*        USING B#BIA,R7            ESTABLISH ADDRESSABILITY         @12 01360001
+*        CLC   B#OMMODE,=CL3'VTM'  ARE WE RUNNING IN VTAM MODE?     @12 01370001
+*        BE    EXIT4               +YES, DISALLOW THE REQUEST       @12 01380001
+*        DROP  R7                  DROP ADDRESSABILITY              @12 01390001
+*                                                                   @12 01400001
+*                                                                       01410001
+*        ARE WE AUTHORIZED ?                                            01420001
+*                                                                       01430001
+         TESTAUTH FCTN=1           ARE WE AUTHORIZED?                   01440001
+         LTR   RF,RF               CHECK IT OUT                         01450001
+         BNZ   *+8                 NOT AUTH'D                           01460001
+         OI    M#SW1,M@SW1AUT      INDICATE AUTHORIZATION               01470001
+*                                                                       01480001
+         CLI   U#CHTYP,U@CHCOM    IS IT COMMAND VALIDATION              01490001
+         BE    CKCMDVER            YES, DO IT NOW                       01500001
+         CLI   U#CHTYP,U@CHTERM   IS IT TERMINATION?                    01510001
+         BE    CKTERM              YES, DO IT NOW                       01520001
+         CLI   U#CHTYP,U@CHRLGN   IS IT RELOGON?                    @07 01530001
+         BE    R$RLGN00            YES, DO IT NOW                   @07 01540001
+         CLI   U#CHTYP,U@CHINIT   IS IT INITIALIZATION?                 01550001
+         BNE   EXIT0               NOT MY CALL                          01560001
+*                                                                       01570001
+*        SEE IF CLASS IS ACTIVE AND RACF IS ACTIVE                  @18 01580001
+*                                                                       01590001
+         MVC   M#RRSL(RRSMDLL),RRSMDL   SET MODEL FOR REQUEST=STAT  @18 01600001
+*                                                                   @18 01610001
+         RACROUTE REQUEST=STAT,     CHECK RACF STATUS AND ...       @18X01620001
+               WORKA=(RA),             ... RESOURCE CLASS           @18X01630001
+               CLASS=U#CHCLSD,                                      @18X01640001
+               MF=(E,M#RRSL),                                       @18X01650001
+               DECOUPL=YES,                                        @19AX01660001
+               RELEASE=2.2          1.9 FOR STAT, 2.2 FOR DYN CDT   @18 01670001
+*                                                                   @18 01680001
+         ST    RF,M#SAFRET          SAVE SAF RETURN CODE            @18 01690001
+         C     RF,=X'00000004'      IS RACF ACTIVE? WITH CLASS      @18 01700001
+         BL    ISAUTHD              ACTIVE                          @18 01710001
+         BH    BADPARM              BAD PARAMETER LIST              @18 01720001
+         LA    R4,M#RRSL            GET ADDRESS OF PARM LIST FOR RC @18 01730001
+         USING SAFP,R4              SAF RETURN AREA MAPPED HERE     @18 01740001
+         L     R5,SAFPRRET          LOAD RACF RETURN CODE           @18 01750001
+         DROP  R4                   DROP OUR MAPPING                @18 01760001
+         ST    R5,M#SRET            SAVE IN OUR DATA AREA           @18 01770001
+         C     R5,=X'0000001C'      BEYOND OUR LIMIT?               @18 01780001
+         BH    BADRRC               THEN MSG AND EXIT               @18 01790001
+         B     *+4(R5)              BRANCH ON RACF RC               @18 01800001
+         B     NODECIDE         0   RACF COULD NOT DECIDE           @18 01810001
+         B     CLSINACT         4   RACF ACTIVE CLASS INACTIVE      @18 01820001
+         B     CLSINACT         8   RACF ACTIVE CLASS NOT DEFINED   @18 01830001
+         B     NORACF           C   RACF INACTIVE CLASS WAS ACTIVE  @18 01840001
+         B     NORACF          10   RACF INACTIVE CLASS INACTIVE    @18 01850001
+         B     NORACF          14   RACF INACTIVE CLASS NOT DEFINED @18 01860001
+         B     NORACF          18   RACF NOT INSTALLED OR BAD LEVEL @18 01870001
+         B     BADPARM         1C   INCORRECT PARM LIST             @18 01880001
+*                                                                   @18 01890001
+*        BAD RETURN CODE FROM STAT REQUEST                          @18 01900001
+*                                                                   @18 01910001
+NODECIDE DS    0H                                                   @18 01920001
+         MVI   U#CHMSGL+1,L'MSG50                                   @18 01930001
+         MVC   U#CHMSG(L'MSG50),MSG50                               @18 01940001
+         B     EXIT4A                                               @18 01950001
+*                                                                   @18 01960001
+*        BAD RETURN CODE FROM STAT REQUEST                          @18 01970001
+*                                                                   @18 01980001
+BADRRC   DS    0H                                                   @18 01990001
+         MVI   U#CHMSGL+1,L'MSG42                                   @18 02000001
+         MVC   U#CHMSG(L'MSG42),MSG42                               @18 02010001
+         B     EXIT4A                                               @18 02020001
+*                                                                   @18 02030001
+*        BAD PARAMETER IN STAT REQUEST                              @18 02040001
+*                                                                   @18 02050001
+BADPARM  DS    0H                                                   @18 02060001
+         MVI   U#CHMSGL+1,L'MSG44                                   @18 02070001
+         MVC   U#CHMSG(L'MSG44),MSG44                               @18 02080001
+         B     EXIT4A                                               @18 02090001
+*                                                                       02100001
+*        CLASS INACTIVE, INDICATE TO USER                               02110001
+*                                                                       02120001
+CLSINACT DS    0H                                                   @18 02130001
+         MVI   U#CHMSGL+1,L'MSG00                                   @04 02140001
+         MVC   U#CHMSG(L'MSG00),MSG00                               @04 02150001
+         B     EXIT4A                                               @17 02160001
+*                                                                   @09 02170001
+*        RACF IS NOT ACTIVE.  DO NOT ALLOW LOGON TO CONTINUE.       @09 02180001
+*                                                                   @09 02190001
+NORACF   EQU   *                                                    @09 02200001
+         MVI   U#CHMSGL+1,L'MSG28             LENGTH OF MESSAGE     @09 02210001
+         MVC   U#CHMSG(L'MSG28),MSG28         INSERT MESSAGE TEXT   @09 02220001
+         B     EXIT4A                                               @17 02230001
+*                                                                       02240001
+*        IF USERID, THEN MUST BE OMVTAM.                                02250001
+*                                                                       02260001
+ISAUTHD  EQU   *                                                        02270001
+         OI    U#CHDISP,U@CHRACF   INDICATE RACF ACTIVE             @07 02280001
+         CLI   U#CHUID,0           ANY USER ID?                         02290001
+         BE    CHOMEGA             NO, VTAM LOGON CODE                  02300001
+*                                                                       02310001
+*****************************************************************       02320001
+* PHASE 1 -                                                     *       02330001
+*                                                               *       02340001
+*     VALIDATE VTAM USERID AND PASSWORD AND CHANGE PASSWORD     *       02350001
+*     IF REQUESTED.                                             *       02360001
+*                                                               *       02370001
+*****************************************************************       02380001
+*                                                                       02390001
+*        ARE WE AUTHORIZED, IF NOT, FAIL, CANNOT VERIFY PASSWORD        02400001
+*                                                                       02410001
+         TM    M#SW1,M@SW1AUT      ARE WE AUTH'D?                       02420001
+         BO    VALIDAT             YES, CONTINUE                        02430001
+         MVI   U#CHMSGL+1,L'MSG01                                   @04 02440001
+         MVC   U#CHMSG(L'MSG01),MSG01                               @04 02450001
+         B     EXIT4A                  EXIT                         @17 02460001
+*                                                                       02470001
+*        FREE ANY PRIOR ACEE, THIS MAY BE A RELOGON AND WE DO NOT       02480001
+*        WANT ACEES HANGING AROUND.                                     02490001
+*                                                                       02500001
+VALIDAT  EQU   *                                                        02510001
+         BAL   R9,FREEACEE         FREE IT                              02520001
+*                                                                       02530001
+*        CHECK THE USERID / PASSWORD                                    02540001
+*                                                                       02550001
+CHKUID   DS    0H                                                       02560001
+         SLR   R2,R2                   NO GROUP                         02570001
+         CLI   U#CHGRP,0               ANY GROUP?                       02580001
+         BE    *+8                     NO                               02590001
+         LA    R2,U#CHGRP              POINT TO IT                      02600001
+         SLR   R3,R3                   NO PASSWORD                      02610001
+         CLI   U#CHNPW,0               ANY NEW PASSWORD?                02620001
+         BE    *+8                     NO                               02630001
+         LA    R3,U#CHNPW              POINT TO IT                      02640001
+         MVC   M#RRVL(RRVMDLL),RRVMDL  SET MODEL CODE IN PLACE      @18 02650001
+*                                                                   @18 02660001
+         RACROUTE REQUEST=VERIFY,      VERIFY A RACF-DEFINED USER   @18X02670001
+               WORKA=(RA),                                          @18X02680001
+               USERID=U#CHUID,         USER ID FIELD                @18X02690001
+               PASSWRD=U#CHCMD,        STORED IN COMMAND FIELD      @18X02700001
+               NEWPASS=(R3),                                        @18X02710001
+               GROUP=(R2),                                          @18X02720001
+               ENVIR=CREATE,                                        @18X02730001
+               ACEE=U#CHACEE,                                       @18X02740001
+               SMC=NO,                                              @18X02750001
+               PASSCHK=YES,                                         @18X02760001
+               DECOUPL=YES,                                        @19AX02770001
+               RELEASE=1.9,                                        @19AX02780001
+               MF=(E,M#RRVL)           USE THIS STORAGE             @18 02790001
+*                                                                   @18 02800001
+         ST    RF,M#VRET            RACROUTE REQUEST=VERIFY SAF RC  @18 02810001
+         LTR   RF,RF                CHECK SAF RETURN CODE           @18 02820001
+         BZ    CHOMEGA              ZERO IS SUCCESS                 @18 02830001
+         C     RF,=X'00000004'      DECISION CANNOT BE MADE         @18 02840001
+         BE    VERCK04               NEED TO LOOK FURTHER AT RC 4   @18 02850001
+         C     RF,=X'00000008'      DECISION CANNOT BE MADE         @18 02860001
+         BE    VERCK08               NEED TO LOOK FURTHER AT RC 8   @18 02870001
+         B     NODEC                CATCHALL FOR UNKNOWN RC         @18 02880001
+*                                                                   @18 02890001
+VERCK04  DS    0H                   CHECK SAF RC 4 RACF RETCODES    @18 02900001
+         LA    R4,M#RRVL            GET ADDRESS OF PARM LIST FOR RC @18 02910001
+         USING SAFP,R4              SAF RETURN AREA MAPPED HERE     @18 02920001
+         L     R5,SAFPRRET          LOAD RACF RETURN CODE           @18 02930001
+         DROP  R4                   DROP OUR MAPPING                @18 02940001
+         ST    R5,M#RRET            SAVE IN OUR DATA AREA           @18 02950001
+         C     R5,=X'00000004'      IS IT USER PROFILE NOT DEFINED? @18 02960001
+         BE    INUID                YES, PUT OUT MSG                @18 02970001
+         C     R5,=X'00000020'      IS RACF NOT ACTIVE?             @18 02980001
+         BE    NORACF               YES, PUT OUT A MSG              @18 02990001
+*                                   OTHERWISE NO DECISION           @18 03000001
+*                                                                   @18 03010001
+*        NO SECURITY DECISION COULD BE MADE                         @18 03020001
+*                                                                   @18 03030001
+NODEC    EQU   *                    NO RACROUTE DECISION            @18 03040001
+         MVI   U#CHMSGL+1,L'MSG50                                   @18 03050001
+         MVC   U#CHMSG(L'MSG50),MSG50                               @18 03060001
+         B     EXIT4A                 ISSUE MESSAGE                 @18 03070001
+*                                                                   @18 03080001
+VERCK08  DS    0H                   CHECK SAF RC 8 RACF RETCODES    @18 03090001
+         LA    R4,M#RRVL            GET ADDRESS OF PARM LIST FOR RC @18 03100001
+         USING SAFP,R4              SAF RETURN AREA MAPPED HERE     @18 03110001
+         L     R5,SAFPRRET          LOAD RACF RETURN CODE           @18 03120001
+         ST    R5,M#RRET            SAVE IN OUR DATA AREA           @18 03130001
+         DROP  R4                   DROP OUR MAPPING                @18 03140001
+         C     R5,=X'00000024'      HIGHER THAN 24 RC?         @21C @18 03150001
+         BH    EXIT4                YES, WE DON'T HANDLE THOSE      @18 03160001
+         B     *+4(R5)              BRANCH INTO TABLE               @18 03170001
+         B     CHOMEGA            0 GOOD                            @18 03180001
+         B     INUID              4 INVALID USER ID                 @18 03190001
+         B     INPWD              8 INVALID PASSWORD                @18 03200001
+         B     EXPWD             0C EXPIRED PASSWORD                @18 03210001
+         B     INNPW             10 INVALID NEW PASSWORD            @18 03220001
+         B     INGRP             14 INVALID GROUP ID                @18 03230001
+         B     EXIT4             18 REQ=VERIFY FAILED BY INST. EXIT @18 03240001
+         B     INUSR             1C USER ACCESS REVOKED             @18 03250001
+         B     EXIT4             20 UNDEFINED RETURN CODE           @18 03260001
+         B     INUSR             24 USER ACCESS TO GROUP REVOKED    @18 03270001
+*                                                                   @18 03280001
+*                                                                       03290001
+*        INVALID USER ID                                                03300001
+*                                                                       03310001
+INUID    EQU   *                                                        03320001
+         MVI   U#CHMSGL+1,L'MSG04                                   @04 03330001
+         MVC   U#CHMSG(L'MSG04),MSG04                               @04 03340001
+         B     EXIT4A                 ISSUE MESSAGE                 @17 03350001
+*                                                                   @08 03360001
+*        USER'S ACCESS TO GROUP HAS BEEN REVOKED                    @08 03370001
+*                                                                   @08 03380001
+INUSR    EQU   *                                                    @08 03390001
+         MVI   U#CHMSGL+1,L'MSG24                                   @08 03400001
+         MVC   U#CHMSG(L'MSG24),MSG24                               @08 03410001
+         B     EXIT4A                 ISSUE MESSAGE                 @17 03420001
+*                                                                       03430001
+*        INVALID PASSWORD                                               03440001
+*                                                                       03450001
+INPWD    EQU   *                                                        03460001
+         MVI   U#CHCMD,0             NO LONGER VALID                    03470001
+         LH    R1,M#PWTIME           GET COUNT                          03480001
+         LA    R1,1(R1)              A HIGHER COUNT                     03490001
+         CH    R1,=H'3'              MUST NOT BE MORE                   03500001
+         BH    INPWDA                TOO BAD, EXIT ERROR                03510001
+         STH   R1,M#PWTIME           SAVE FOR NEXT TRY                  03520001
+         MVI   U#CHMSGL+1,L'MSG08A                                  @04 03530001
+         MVC   U#CHMSG(L'MSG08A),MSG08A                             @04 03540001
+         B     EXIT4A                 ISSUE MESSAGE                     03550001
+INPWDA   EQU   *                                                        03560001
+         MVI   U#CHMSGL+1,L'MSG08B                                  @04 03570001
+         MVC   U#CHMSG(L'MSG08B),MSG08B                             @04 03580001
+         B     EXIT4A                 ISSUE MESSAGE                 @17 03590001
+*                                                                       03600001
+*        EXPIRED PASSWORD                                               03610001
+*                                                                       03620001
+EXPWD    EQU   *                                                        03630001
+         MVI   U#CHMSGL+1,L'MSG12                                   @04 03640001
+         MVC   U#CHMSG(L'MSG12),MSG12                               @04 03650001
+         B     EXIT4A                 SECOND TRY                        03660001
+*                                                                       03670001
+*        NEW PASSWORD ERRROR                                            03680001
+*                                                                       03690001
+INNPW    EQU   *                                                        03700001
+         MVI   U#CHMSGL+1,L'MSG16                                   @04 03710001
+         MVC   U#CHMSG(L'MSG16),MSG16                               @04 03720001
+         MVI   U#CHNPW,0               RESET PASSWORD                   03730001
+         B     EXIT4A                 SECOND TRY                        03740001
+*                                                                       03750001
+*        INVALID GROUP ID                                               03760001
+*                                                                       03770001
+INGRP    EQU   *                                                        03780001
+         MVI   U#CHMSGL+1,L'MSG20                                   @04 03790001
+         MVC   U#CHMSG(L'MSG20),MSG20                               @04 03800001
+         MVI   U#CHGRP,0               SET LENGTH OFF                   03810001
+         B     EXIT4A                 SECOND TRY                        03820001
+*                                                                       03830001
+*****************************************************************       03840001
+* PHASE 2 -                                                     *       03850001
+*                                                               *       03860001
+*   CHECK RESOURCE INITIAL3,2,1,0 AND IF DEFINED LOCK /PWD TO   *       03870001
+*   THE RESPECTIVE LEVEL.                                       *       03880001
+*                                                               *       03890001
+*   A RESOURCE OF INITIAL (WITHOUT A NUMBER) ALLOWS THE USER    *       03900001
+*   TO SET HIS OWN SECURITY LEVEL VIA THE /PWD COMMAND          *       03910001
+*                                                               *       03920001
+*   IF NO RESOURCE IS DEFINED THEN NO ONE WILL BE ALLOWED TO    *       03930001
+*   USE OMEGAMON....SO DEFINE AT LEAST ONE RESOURCE.            *       03940001
+*                                                               *       03950001
+*****************************************************************       03960001
+*        HE IS WHO HE SAID HE IS, IS OMEGAMON ALLOWED?                  03970001
+CHOMEGA  EQU   *                                                        03980001
+         LA    R3,OMENTS           POINT TO TABLE OF RESOURCES          03990001
+RCHECK   DS    0H                                                       04000001
+         L     R2,U#CHACEE          POINT TO ACEE IF PRESENT            04010001
+         MVC   M#RRAL(RRAMDLL),RRAMDL  SET MODEL FOR REQUEST=AUTH   @18 04020001
+*                                                                   @18 04030001
+         RACROUTE REQUEST=AUTH,     CHECK RACF AUTHORIZATION        @18X04040001
+               WORKA=(RA),                                          @18X04050001
+               ACEE=(R2),                                           @18X04060001
+               ENTITYX=((R3)),                                      @18X04070001
+               CLASS=U#CHCLS,                                       @18X04080001
+               LOG=NONE,                                            @18X04090001
+               RELEASE=1.9,                                         @18X04100001
+               DECOUPL=YES,                                        @19AX04110001
+               MF=(E,M#RRAL)                                        @18 04120001
+*                                                                   @18 04130001
+         ST    RF,M#ARET            REQUEST=AUTH SAF RC             @18 04140001
+         C     RF,=X'00000008'          AN ERROR?                   @08 04150001
+         BH    CKLEVL                   TRY NEXT LEVEL              @18 04160001
+         B     *+4(RF)              DO IT                           @18 04170001
+         B     CKOK             0   USER IS AUTHORIZED              @18 04180001
+         B     NOTDEF           4   FN COULD NOT COMPLETE           @18 04190001
+         B     CKLEVL           8   NOT AT THIS LEVEL               @18 04200001
+NOTDEF   EQU   *                                                        04210001
+CKLEVL   EQU   *                                                        04220001
+         LA    R3,L'OMENTS(R3)     NEXT ONE                             04230001
+         CLI   0(R3),255           END OF LIST?                         04240001
+         BNE   RCHECK              NO, DO MORE                          04250001
+         B     NOTALLOW            TOO BAD, DON'T ACCEPT IT             04260001
+SETLOW   EQU   *                                                        04270001
+         LA    R3,OMENT0            PASS WITH LOW AUTH                  04280001
+CKOK     EQU   *                                                        04290001
+         MVC   U#CHAUT4,OMENTOFF(R3) GET NUMBER 0 - 3 DECIMAL           04300001
+         NI    U#CHAUT4,X'0F'      CLEAR TOP OF BYTE                    04310001
+         CLI   OMENTOFF(R3),C' '   IS IT BLANK? (XXXXXXX_)              04320001
+         BE    EXIT0               YES, NOT LOCKED                      04330001
+         OI    U#CHAUT1,U@CH1LOK   INDICATE WE WERE THERE               04340001
+         B     EXIT0                                                    04350001
+NOTALLOW EQU   *                                                        04360001
+         MVI   U#CHMSGL+1,L'MSG25                                   @04 04370001
+         MVC   U#CHMSG(L'MSG25),MSG25 TEXT                          @04 04380001
+*                                                                       04390001
+*        RELEASE THE ACEE                                               04400001
+*                                                                       04410001
+         BAL   R9,FREEACEE          FREE IT                             04420001
+         B     EXIT4A               ISSUE MESSAGE                   @17 04430001
+*                                                                       04440001
+*        TERMINATION ROUTINE HERE                                       04450001
+*                                                                       04460001
+CKTERM   DS    0H                                                       04470001
+*                                                                       04480001
+*        IF AUTHORIZED, THEN RELEASE ACEE                               04490001
+*                                                                       04500001
+         TM    M#SW1,M@SW1AUT      INDICATE AUTHORIZATION               04501001
+         BNO   FREERA              SKIP FREEACEE                   @20C 04502001
+*                                                                       04503001
+*        RELEASE THE ACEE                                               04504001
+*                                                                       04505001
+         BAL   R9,FREEACEE          FREE IT                             04506001
+*                                                                   @18 04507001
+*        RELEASE THE RACROUTE WORKAREA IF IT WAS ALLOCATED          @18 04508001
+*                                                                   @18 04509001
+FREERA   DS    0H                                                  @20A 04510001
+         CLC   M#RRWAI,RRWAICAT    DO WE HAVE AN EYECATCHER?        @18 04520001
+         BNE   SKIPFREE             NO SKIP FREEMAIN CALL           @18 04530001
+         ICM   R1,15,M#RRWA         DO WE HAVE A WORKAREA?          @18 04540001
+         BZ    NOFREE               NO SKIP FREEMAIN CALL           @18 04550001
+         LA    R2,M@RRWAL           PREP FOR RELEASE                @18 04560001
+         FREEMAIN RU,LV=(R2),A=(R1) FREE IT                         @18 04570001
+         XC    M#RRWA,M#RRWA        CLEAR STORAGE POINTER           @18 04580001
+NOFREE   DS    0H                   NO NEED TO FREE STORAGE AND PTR @18 04590001
+         XC    M#RRWAI,M#RRWAI      CLEAR EYECATCHER                @18 04600001
+SKIPFREE DS    0H                   NO NEED                         @18 04610001
+         B     EXIT0                 CONTINUE                           04620001
+*                                                                   @07 04630001
+*****************************************************************   @07 04640001
+*                                                               *   @07 04650001
+*  PHASE 3 - PROCESS A RELOGON VALIDATION.                      *   @07 04660001
+*                                                               *   @07 04670001
+*     WE WILL COME HERE WHEN A USER HAS ENTERED A USERID AND    *   @07 04680001
+*     PASSWORD VIA THE /PWD COMMAND.  WE WILL FREE THE PREVIOUS *   @07 04690001
+*     USER'S ACEE BEFORE VALIDATING THE NEW USER'S ID AND       *   @07 04700001
+*     PASSWORD.                                                 *   @07 04710001
+*                                                               *   @07 04720001
+*     THE RELOGON FACILITY DOES NOT ALLOW THE SPECIFICATION OF  *   @07 04730001
+*     A NEW PASSWORD.  IF THE CURRENT PASSWORD HAS EXPIRED,     *   @07 04740001
+*     THE RELOGON ATTEMPT WILL FAIL.                            *   @07 04750001
+*                                                               *   @07 04760001
+*     WE WILL SAVE THE PREVIOUS USER'S ACEE IN CASE THE         *   @07 04770001
+*     RELOGON ATTEMPT FAILS.  IT IS SAVED SO THAT, IF AN        *   @07 04780001
+*     INSTALLATION WISHES, THE PREVIOUS USER WILL REMAIN LOGGED *   @07 04790001
+*     ON.                                                       *   @07 04800001
+*                                                               *   @07 04810001
+*     EACH INSTALLATION MUST DECIDE FOR ITSELF WHAT TO DO IF    *   @07 04820001
+*     IF THE RELOGON ATTEMPT FAILS - WHETHER THE PREVIOUS USER  *   @07 04830001
+*     REMAINS LOGGED ON OR NO USER ID IS ASSOCIATED WITH THE    *   @07 04840001
+*     SESSION.                                                  *   @07 04850001
+*                                                               *   @07 04860001
+*     PLEASE NOTE THAT RELOGON PROCESSING IS NOT ALLOWED IN     *   @07 04870001
+*     TSO MODE.  ALSO, IT IS POSSIBLE THAT A ZERO-LENGTH        *   @07 04880001
+*     PASSWORD MAY BE PASSED TO THE EXIT.  YOU MAY WANT TO      *   @07 04890001
+*     CHECK FOR THIS CONDITION IN ORDER TO DETERMINE WHETHER    *   @07 04900001
+*     THE USERID OR SECURITY LEVEL SHOULD BE RESET.             *   @07 04910001
+*                                                               *   @07 04920001
+*     RETURN CODES FROM RELOGON:                                *   @07 04930001
+*                   0  -  GOOD, RELOGON SUCCESSFUL.             *   @07 04940001
+*                   4  -  RELOGON REJECTED, OLD USERID STILL    *   @07 04950001
+*                           LOGGED ON.                          *   @07 04960001
+*                   8  -  RELOGON REJECTED, NO USERID LOGGED    *   @07 04970001
+*                           ON.                                 *   @07 04980001
+*                  12  -  RELOGON REJECTED, OMEGAMON SESSION    *   @07 04990001
+*                           TERMINATED.                         *   @07 05000001
+*                                                               *   @07 05010001
+*     PLEASE USE THE ABOVE RETURN CODES EVEN THOUGH THE USE OF  *   @07 05020001
+*     RETURN CODES 4 AND 12 ARE NOT DEMONSTRATED IN THIS        *   @07 05030001
+*     SAMPLE EXIT.                                              *   @07 05040001
+*                                                               *   @07 05050001
+*     NOTE:  THIS SAMPLE EXIT IS STRUCTURED SO THAT, IF THE     *   @07 05060001
+*           RELOGON ATTEMPT FAILS, NO USERID WILL BE ASSOCIATED *   @07 05070001
+*           WITH THE SESSION (RC=8).  IF THIS IS NOT WHAT YOUR  *   @07 05080001
+*           INSTALLATION REQUIRES AND YOU WISH TO RETURN TO THE *   @07 05090001
+*           PREVIOUS USER'S ACEE, YOU ARE RESPONSIBLE FOR       *   @07 05100001
+*           ADDING THE APPROPRIATE CODE.  A FIELD, U#CHACBN, HAS*   @07 05110001
+*           BEEN ADDED TO THE $UCHECK MACRO SO THAT THE ACEE    *   @07 05120001
+*           FOR THE PREVIOUS USER CAN BE SAVED.                 *   @07 05130001
+*                                                               *   @07 05140001
+*     IT SHOULD ALSO BE NOTED THAT THE U@CH1LOK FLAG DISABLES   *   @10 05150001
+*     CHANGING THE SECURITY LEVEL WITH THE /PWD COMMAND.  IT    *   @10 05160001
+*     DOES NOT DISABLE USING THE /PWD COMMAND FOR RELOGON.  IF  *   @10 05170001
+*     YOU WANT TO ALSO DISALLOW /PWD FOR RELOGON, YOU SHOULD    *   @10 05180001
+*     CHECK THE U@CH1LOK FLAG BEFORE CONTINUING IN THIS CODE.   *   @10 05190001
+*                                                               *   @10 05200001
+*****************************************************************   @07 05210001
+*                                                                   @07 05220001
+*        ARE WE AUTHORIZED, IF NOT, FAIL, CANNOT VERIFY PASSWORD    @07 05230001
+*                                                                   @07 05240001
+R$RLGN00 EQU   *                                                    @07 05250001
+         TM    M#SW1,M@SW1AUT      ARE WE AUTH'D?                   @07 05260001
+         BO    R$RLGN10            YES, CONTINUE                    @07 05270001
+         MVI   U#CHMSGL+1,L'MSG01                                   @07 05280001
+         MVC   U#CHMSG(L'MSG01),MSG01                               @07 05290001
+         B     EXIT4A                  ISSUE MESSAGE                @17 05300001
+*                                                                   @07 05310001
+*        IF IN DEDICATED MODE, WE MIGHT NOT YET HAVE DETERMINED     @07 05320001
+*        WHETHER RACF IS ACTIVE.                                    @07 05330001
+*                                                                   @07 05340001
+R$RLGN10 EQU   *                                                    @07 05350001
+         TM    U#CHDISP,U@CHRACF       RACF ACTIVE?                 @07 05360001
+         BO    R$RLGN20                YES, CONTINUE                @07 05370001
+*                                                                   @07 05380001
+*        SEE IF CLASS IS ACTIVE AND RACF IS ACTIVE                  @18 05390001
+*                                                                   @07 05400001
+         MVC   M#RRSL(RRSMDLL),RRSMDL  SET MODEL FOR RACSTAT        @18 05410001
+*                                                                   @18 05420001
+         RACROUTE REQUEST=STAT,     CHECK RACF STATUS AND ...       @18X05430001
+               WORKA=(RA),             ... RESOURCE CLASS           @18X05440001
+               CLASS=U#CHCLSD,                                      @18X05450001
+               MF=(E,M#RRSL),                                       @18X05460001
+               DECOUPL=YES,                                        @19AX05470001
+               RELEASE=2.2          1.9 FOR STAT, 2.2 FOR DYN CDT   @18 05480001
+*                                                                   @18 05490001
+         ST    RF,M#SRET            RACSTAT RETURN VALUE            @18 05500001
+         C     RF,=X'00000004'      IS RACF ACTIVE? WITH CLASS      @18 05510001
+         BL    R$RLGN20             ACTIVE                          @18 05520001
+         BH    EXIT0                NO RACF/CLASS NOT THERE         @18 05530001
+*                                                                   @07 05540001
+*        FREE ANY PRIOR ACEE, THIS MAY BE A RELOGON AND WE DO NOT   @07 05550001
+*        WANT ACEES HANGING AROUND.                                 @07 05560001
+*                                                                   @07 05570001
+R$RLGN20 EQU   *                                                    @07 05580001
+         MVC   U#CHACBN(4),U#CHACEE   SAVE PREVIOUS USER'S ACEE     @07 05590001
+         BAL   R9,FREEACEE         FREE IT                          @07 05600001
+*                                                                   @07 05610001
+*        PROCESS RELOGON VALIDATION REQUEST.                        @07 05620001
+*                                                                   @07 05630001
+*        CHECK THE USERID / PASSWORD                                @07 05640001
+*                                                                   @07 05650001
+         SLR   R2,R2                   NO GROUP                     @07 05660001
+         CLI   U#CHGRP,0               ANY GROUP?                   @07 05670001
+         BE    *+8                     NO                           @07 05680001
+         LA    R2,U#CHGRP              POINT TO IT                  @07 05690001
+         SLR   R3,R3                   NO PASSWORD                  @07 05700001
+         MVC   M#RRVL(RRVMDLL),RRVMDL  SET MODEL CODE FOR A VERIFY  @18 05710001
+*                                                                   @18 05720001
+         RACROUTE REQUEST=VERIFY,       REQUEST A VERIFY            @18X05730001
+               WORKA=(RA),              WITH OUR RACROUTE WORKAREA  @18X05740001
+               USERID=U#CHRID,          USER ID FIELD               @18X05750001
+               PASSWRD=U#CHRPW,         PASSWORD                    @18X05760001
+               GROUP=(R2),                                          @18X05770001
+               ENVIR=CREATE,                                        @18X05780001
+               ACEE=U#CHACEE,                                       @18X05790001
+               SMC=NO,                  STEP MUST COMPLETE          @18X05800001
+               PASSCHK=YES,                                         @18X05810001
+               DECOUPL=YES,                                        @19AX05820001
+               RELEASE=1.9,                                        @19AX05830001
+               MF=(E,M#RRVL)            USE THIS STORAGE            @18 05840001
+*                                                                   @18 05850001
+         ST    RF,M#VRET            RACROUTE VERIFY RETURN VALUE    @18 05860001
+*                                                                   @07 05870001
+*        CHECK RETURN CODE FROM RACF.  IF ZERO, CHECK IF USER IS    @07 05880001
+*        ALLOWED TO USE THE RESOURCE.                               @07 05890001
+*                                                                   @07 05900001
+*        IF RETURN CODE IS NOT ZERO, DENY REQUEST AND RETURN WITH   @07 05910001
+*        A RETURN CODE OF 8  WHICH INDICATES THAT NO USERID IS      @07 05920001
+*        ASSOCIATED WITH THE CURRENT SESSION, AND NO COMMANDS       @07 05930001
+*        MARKED AS EXTERNAL=YES AND LEVEL=0 WILL BE ALLOWED TO      @07 05940001
+*        EXECUTE UNTIL A VALID USERID AND PASSWORD HAVE BEEN        @07 05950001
+*        ENTERED.                                                   @07 05960001
+*                                                                   @07 05970001
+         LTR   RF,RF                CHECK RETURN CODE               @07 05980001
+         BZ    R$RLGN40             0 GOOD - NOW CHECK RESOURCE     @07 05990001
+*                                                                   @07 06000001
+*        INVALID USERID OR PASSWORD.  RELOGON REQUEST DENIED.       @07 06010001
+*        RETURN WITH ERROR MESSAGE & RETURN CODE                    @07 06020001
+*                                                                   @07 06030001
+         OI    U#CHRESP,U@CHMSHO   MESSAGE PENDING                  @07 06040001
+         MVI   U#CHMSGL+1,L'R#MSG05           LENGTH OF MESSAGE     @07 06050001
+         MVC   U#CHMSG(L'R#MSG05),R#MSG05     INSERT MESSAGE TEXT   @07 06060001
+         LA    RF,8                 SET RETURN CODE                 @07 06070001
+         B     INPW990                                              @07 06080001
+*                                                                   @07 06090001
+*        HE IS WHO HE SAID HE IS, IS OMEGAMON ALLOWED?              @07 06100001
+*                                                                   @07 06110001
+R$RLGN40 EQU   *                                                    @07 06120001
+         LA    R3,OMENTS           POINT TO TABLE OF RESOURCES      @07 06130001
+R$RLGN50 DS    0H                                                   @07 06140001
+         L     R2,U#CHACEE          POINT TO ACEE IF PRESENT        @07 06150001
+         MVC   M#RRAL(RRAMDLL),RRAMDL    SET MODEL FOR AUTH CHECK   @18 06160001
+*                                                                   @18 06170001
+*                                                                   @18 06180001
+         RACROUTE REQUEST=AUTH,      CHECK FOR AUTHORIZATION        @18X06190001
+               WORKA=(RA),                                          @18X06200001
+               ACEE=(R2),                                           @18X06210001
+               ENTITYX=((R3)),                                      @18X06220001
+               CLASS=U#CHCLS,                                       @18X06230001
+               LOG=NONE,                                            @18X06240001
+               RELEASE=1.9,                                         @18X06250001
+               DECOUPL=YES,                                        @19AX06260001
+               MF=(E,M#RRAL)                                        @18 06270001
+*                                                                   @18 06280001
+         ST    RF,M#ARET            REQUEST=AUTH RETURN CODE        @18 06290001
+         C     RF,=X'0000000C'      AN ERROR?                       @09 06300001
+         BH    R$RLGNNO             DON'T ALLOW RELOGON             @09 06310001
+         B     *+4(RF)              DO IT                           @07 06320001
+         B     R$RLGNOK         0   USER IS AUTHORIZED              @07 06330001
+         B     R$RLGN60         4   NO RACF DECISION, SAME AS REJECT@07 06340001
+         B     R$RLGN65         8   REQUESTED FN FAILED, REJECT     @07 06350001
+         B     R$RLGN70         C   SHOULD NOT OCCUR                @07 06360001
+R$RLGN60 EQU   *                                                    @07 06370001
+R$RLGN65 EQU   *                                                    @07 06380001
+         LA    R3,L'OMENTS(R3)     NEXT ONE                         @07 06390001
+         CLI   0(R3),255           END OF LIST?                     @07 06400001
+         BNE   R$RLGN50            NO, DO MORE                      @07 06410001
+         B     R$RLGNNO            TOO BAD, DON'T ACCEPT IT         @07 06420001
+R$RLGN70 EQU   *                                                    @07 06430001
+         LA    R3,OMENT0            PASS WITH LOW AUTH              @07 06440001
+*                                                                   @07 06450001
+R$RLGNOK EQU   *                                                    @07 06460001
+         MVC   U#CHAUT4,OMENTOFF(R3) GET NUMBER 0 - 3 DECIMAL       @07 06470001
+         NI    U#CHAUT4,X'0F'    CLEAR TOP OF BYTE                  @07 06480001
+         CLI   OMENTOFF(R3),C' '   IS IT BLANK? (XXXXXXX_)          @07 06490001
+         BE    R$RLG100            YES, NOT LOCKED                  @07 06500001
+         OI    U#CHAUT1,U@CH1LOK   INDICATE WE WERE THERE           @07 06510001
+R$RLG100 EQU   *                                                    @07 06520001
+         OI    U#CHRESP,U@CHMSHO   MESSAGE PENDING                  @07 06530001
+         MVI   U#CHMSGL+1,L'R#MSG04           LENGTH OF MESSAGE     @07 06540001
+         MVC   U#CHMSG(L'R#MSG04),R#MSG04     INSERT MESSAGE TEXT   @07 06550001
+         B     EXIT0                                                @07 06560001
+*                                                                   @07 06570001
+R$RLGNNO EQU   *                                                    @07 06580001
+         OI    U#CHRESP,U@CHMSHO   MESSAGE PENDING                  @07 06590001
+         MVI   U#CHMSGL+1,L'R#MSG05           LENGTH OF MESSAGE     @07 06600001
+         MVC   U#CHMSG(L'R#MSG05),R#MSG05     INSERT MESSAGE TEXT   @07 06610001
+*                                                                   @07 06620001
+*        RELEASE THE ACEE                                           @07 06630001
+*                                                                   @07 06640001
+         BAL   R9,FREEACEE          FREE IT                         @07 06650001
+         LA    RF,8                 SET RETURN CODE                 @07 06660001
+         B     INPW990                                              @07 06670001
+*****************************************************************       06680001
+* PHASE 4 -                                                     *   @07 06690001
+*                                                               *       06700001
+*  EXTERNAL COMMANDS ARE VALIDATED HERE.  THE CLASS THAT IS     *   @18 06710001
+*  SUPPLIED IS 'OMCANDLE' AND THE RESOURCE IS THE OMEGAMON      *   @18 06720001
+*  COMMAND.                                                     *       06730001
+*                                                               *       06740001
+*****************************************************************       06750001
+*                                                                       06760001
+*        COMMAND VERIFICATION HERE                                      06770001
+*                                                                       06780001
+CKCMDVER DS    0H                                                       06790001
+         MVC   M#SCR32X,SCR32X      INIT SCRATCH ENTITYX TEMPLATE   @18 06800001
+*                                                                   @06 06810001
+*                                                                   @06 06820001
+*        IF THIS COMMAND HAS BEEN PREVIOUSLY PROCESSED BY THIS      @06 06830001
+*        EXIT, WE WILL BYPASS THE REQEST=AUTH CALL IN ORDER TO      @18 06840001
+*        REDUCE OVERHEAD; THE COMMAND WILL BE HANDLED IN            @06 06850001
+*        ACCORDANCE WITH THE PREVIOUS DISPOSITION.  NOTE THAT       @06 06860001
+*        THE DISPOSITION OF THE COMMAND CANNOT BE CHANGED.          @06 06870001
+*                                                                   @06 06880001
+         TM    U#CHDISP,U@CHALLW    COMMAND PREVIOUSLY ALLOWED?     @06 06890001
+         BO    EXIT0                +YES, ALLOW THE COMMAND         @06 06900001
+         TM    U#CHDISP,U@CHDSLW    COMMAND PREVIOUSLY DISALLOWED   @06 06910001
+         BO    EXIT8                +YES, EXIT WITH A MESSAGE       @06 06920001
+*                                                                       06930001
+*        CHANGE COMMANDS THAT HAVE NON STANDARD SYNTAX TO SOMETHING     06940001
+*        RACF CALL DEAL WITH                                            06950001
+*                                                                       06960001
+         CLI   U#CHCMDD,C'/'   /GIVE => $GIVE   IS THIS AN INFO-LINE    06970001
+         BNE   CKCMD00                          NO, LOOK FOR A DOT      06980001
+         MVI   U#CHCMDD,U@CHCINF                REPLACE WITH NEW CHAR   06990001
+         B     CKCMD10                                                  07000001
+CKCMD00  DS    0H                                                       07010001
+*                                                                       07020001
+         CLI   U#CHCMDD,C'.'  .DIR => @DIR      IS THIS A DOT CMD       07030001
+         BNE   CKCMD10                          NO, NORMAL COMMAND      07040001
+         MVI   U#CHCMDD,U@CHCDOT                REPLACE WITH NEW CHAR   07050001
+CKCMD10  DS    0H                                                       07060001
+*                                                                       07070001
+         MVC   M#SCR32X+SCR32STR(L'U#CHCMDD),U#CHCMDD  MOVE COMMAND @18 07080001
+         L     R3,U#CHACEE                      GET ADDRESS OF ACEE     07090001
+         LA    R4,M#SCR32X                      LOAD RESOURCE ADDR  @18 07100001
+         LA    R5,U#CHCLS                       LOAD CLASS ADDR         07110001
+         MVC   M#RRAL(RRAMDLL),RRAMDL SET COMMAND MODEL FOR AUTH    @18 07120001
+*                                                                       07130001
+         RACROUTE REQUEST=AUTH,     CHECK RACF AUTHORIZATION        @18X07140001
+               WORKA=(RA),                                          @18X07150001
+               ENTITYX=((R4)),                                      @18X07160001
+               CLASS=(R5),                                          @18X07170001
+               ATTR=READ,                                           @18X07180001
+               ACEE=(R3),                                           @18X07190001
+               RELEASE=1.9,                                         @18X07200001
+               DECOUPL=YES,                                        @19AX07210001
+               MF=(E,M#RRAL)                                        @18 07220001
+*                                                                   @18 07230001
+         ST    RF,M#ARET            REQUEST=AUTH SAF RC             @18 07240001
+         C     RF,=X'0000000C'      AN ERROR?                       @18 07250001
+         BH    EXIT4                EXIT WITH ERROR                 @18 07260001
+         B     *+4(RF)             TEST AUTH RETURN CODES           @18 07270001
+         B     EXIT0           0   ACCESS IS ALLOWED                @18 07280001
+         B     EXIT4           4   NO RACF DECISION                 @18 07290001
+         B     EXIT8           8   REQUESTED FN FAILED              @18 07300001
+         B     EXIT4           C   SHOULD NEVER HAPPEN              @18 07310001
+*                                                                       07320001
+*        RETURN TO CALLER WITH PROPER RETURN CODE                       07330001
+*                                                                       07340001
+EXIT0    DS    0H                                                       07350001
+         LA    RF,0                SET RETURN CODE                      07360001
+         B     INPW990                                                  07370001
+*                                                                       07380001
+EXIT4A   DS    0H                                                       07390001
+         OI    U#CHRESP,U@CHRSHO   SET RESHOW BEFORE EXIT               07400001
+EXIT4    DS    0H                                                       07410001
+         LA    RF,4                SET RETURN CODE                      07420001
+         B     INPW990                                                  07430001
+*                                                                       07440001
+EXIT8    DS    0H                                                       07450001
+         MVI   U#CHMSGL+1,L'MSG30A                                  @04 07460001
+         MVC   U#CHMSG(L'MSG30A),MSG30A MOVE IN MESSAGE             @04 07470001
+         OI    U#CHRESP,U@CHMSHO   SET MSG PENDING FLAG                 07480001
+         LA    RF,8                SET RETURN CODE                      07490001
+         B     INPW990                                                  07500001
+*                                                                       07510001
+INPW990  DS    0H                                                       07520001
+*                                                                   @18 07530001
+         L     RD,4(RD)              PRIOR SAVE                         07540001
+         RETURN (14,12),RC=(15)      RETURN TO THE CALLER               07550001
+*                                                                       07560001
+* RELEASE ACEE SUBROUTINE                                               07570001
+*                                                                       07580001
+FREEACEE DS    0H                                                       07590001
+         CLC   U#CHACEE,=A(0)       IS THERE AN ACEE?                   07600001
+         BER   R9                   NO, GET OUT OF HERE FAST!           07610001
+         XC    M#PWTIME,M#PWTIME    ALLOW FULL MULTIPLE TRY             07620001
+         MVC   M#RRFL(RRFMDLL),RRFMDL   MOVE IN FREE/DELETE MODEL   @18 07630001
+*                                                                   @18 07640001
+         RACROUTE REQUEST=VERIFY,       REQUEST=VERIFY W/ DELETE    @18X07650001
+               WORKA=(RA),                                          @18X07660001
+               ACEE=U#CHACEE,                                       @18X07670001
+               DECOUPL=YES,                                        @19AX07680001
+               RELEASE=1.9,                                        @19AX07690001
+               MF=(E,M#RRFL)            USE THIS STORAGE TO DELETE  @18 07700001
+*                                                                   @18 07710001
+         ST    RF,M#FRET            RACROUTE VERIFY RETURN VALUE    @18 07720001
+         XC    U#CHACEE,U#CHACEE    RESET IT                            07730001
+         BR    R9                   RETURN TO CALLER                    07740001
+*                                                                       07750001
+*        GETMAIN EYECATCHER                                         @18 07760001
+*                                                                   @18 07770001
+RRWAICAT DC    CL4'!RWA'            RACROUTE WORKAREA EYECATCHER    @18X07780001
+                                                            STRING  @18 07790001
+*                                                                   @18 07800001
+RRVMDL   RACROUTE REQUEST=VERIFY,                                   @18X07810001
+               USERID=*-*,              USER ID FIELD               @18X07820001
+               PASSWRD=*-*,             STORED IN COMMAND FIELD     @18X07830001
+               GROUP=*-*,                                           @18X07840001
+               NEWPASS=*-*,                                         @18X07850001
+               ENVIR=CREATE,                                        @18X07860001
+               ACEE=*-*,                                            @18X07870001
+               SMC=NO,                                              @18X07880001
+               PASSCHK=YES,                                         @18X07890001
+               APPL=M$APPL,                                         @18X07900001
+               DECOUPL=YES,                                        @19AX07910001
+               RELEASE=1.9,                                        @19AX07920001
+               MF=L                     MODEL CODE                  @18 07930001
+RRVMDLL  EQU   *-RRVMDL                                             @18 07940001
+*                                                                       07950001
+RRFMDL   RACROUTE REQUEST=VERIFY,                                   @18X07960001
+               ACEE=*-*,                                            @18X07970001
+               ENVIR=DELETE,                                        @18X07980001
+               SMC=NO,                                              @18X07990001
+               DECOUPL=YES,                                        @19AX08000001
+               RELEASE=1.9,                                        @19AX08010001
+               MF=L                     MODEL CODE                  @18 08020001
+RRFMDLL  EQU   *-RRFMDL                                                 08030001
+*                                                                       08040001
+RRSMDL   RACROUTE REQUEST=STAT,                                     @18X08050001
+               CLASS=*-*,                                           @18X08060001
+               MF=L,                                                @18X08070001
+               DECOUPL=YES,                                        @19AX08080001
+               RELEASE=2.2                                          @18 08090001
+RRSMDLL  EQU   *-RRSMDL                                             @18 08100001
+*                                                                       08110001
+RRAMDL   RACROUTE REQUEST=AUTH,                                     @18X08120001
+               ENTITYX=(*-*),                                       @18X08130001
+               CLASS=*-*,                                           @18X08140001
+               ATTR=READ,                                           @18X08150001
+               APPL=M$APPL,                                         @18X08160001
+               RELEASE=1.9,                                         @18X08170001
+               DECOUPL=YES,                                        @19AX08171001
+               MF=L                                                 @18 08172001
+RRAMDLL  EQU   *-RRAMDL                                             @18 08173001
+*                                                                       08174001
+OMENTS   DS    0CL14       OMEGAMON EXTENDED RESOURCE ENTITY TABLE  @18 08175001
+         DC    AL2(10),AL2(8),CL10'INITIAL3  '                      @18 08176001
+OMENTOFF EQU   11             OFFSET TO NUMERIC FLAG VALUE          @18 08177001
+         DC    AL2(10),AL2(8),CL10'INITIAL2  '                      @18 08178001
+         DC    AL2(10),AL2(8),CL10'INITIAL1  '                      @18 08179001
+OMENT0   DC    AL2(10),AL2(8),CL10'INITIAL0  '                      @18 08180001
+         DC    AL2(10),AL2(7),CL10'INITIAL   '                      @18 08190001
+         DC    AL1(255)                                                 08200001
+*                                                                   @18 08210001
+SCR32X   DC    AL2(32),AL2(0),CL32'          '  CMD SCRATCH BUFFER  @18 08220001
+SCR32STR EQU   4                    POINT BEYOND TWO 2-BYTE LENGTHS @18 08230001
+*                                                                       08240001
+M$APPL   DC    CL8'CANDLE'                                              08250007
+*M$APPL   DC    CL8'OMAPPL1'                                            08251007
+*                                                                       08260001
+MSG00    DC    C'REQUIRED RACF CLASS INACTIVE'                          08270001
+MSG01    DC    C'SESSION NOT APF AUTHORIZED'                            08280001
+MSG04    DC    C'USER NOT DEFINED TO RACF'                              08290001
+MSG08A   DC    C'INVALID PASSWORD, REENTER RACF PASSWORD'               08300001
+MSG08B   DC    C'INVALID PASSWORD, SESSION REJECTED BY RACF'            08310001
+MSG12    DC    C'PASSWORD HAS EXPIRED, ENTER NEW PASSWORD'              08320001
+MSG16    DC    C'NEW PASSWORD IS INVALID, REENTER'                      08330001
+MSG20    DC    C'USER NOT DEFINED TO THIS GROUP, REENTER GROUP'         08340001
+MSG24    DC    C'USER''S ACCESS TO GROUP REVOKED, LOGON REJECTED'   @08 08350001
+MSG25    DC    C'RESOURCE CHECKING DONE BY RACF'                        08360001
+MSG28    DC    C'RACF OR CLASS INACTIVE, LOGON REJECTED '           @09 08370001
+MSG30A   DC    C'RACF HAS DETERMINED THAT YOU ARE NOT AUTHORIZED TO INVX08380001
+               OKE THIS COMMAND; COMMAND SUPPRESSED'                @06 08390001
+MSG42    DC    C'BAD RETURN CODE FROM RACROUTE REQUEST=STAT'        @18 08400001
+MSG44    DC    C'BAD PARAMETER LIST FROM RACROUTE REQUEST=STAT'     @18 08410001
+MSG46    DC    C'ERROR OBTAINING STORAGE FROM GETMAIN'              @18 08420001
+MSG50    DC    C'NO SECURITY DECISION COULD BE MADE'                @18 08430001
+*                                                                   @07 08440001
+* NOTE:  THE MAXIMUM LENGTH FOR R#MSG04 AND R#MSG05 IS 60 SINCE     @07 08450001
+*        THESE MESSAGES ARE OUTPUT ON THE INFO LINE AND 60 IS THE   @07 08460001
+*        MAXIMUM LENGTH OF THE INFO-LINE OUTPUT AREA.  IF THESE     @07 08470001
+*        MESSAGES EXCEED THE MAXIMUM LENGTH OF 60, OUR DEFAULT      @07 08480001
+*        MESSAGES, OB0243 AND OB0244, WILL BE USED INSTEAD.         @07 08490001
+*                                                                   @07 08500001
+R#MSG04  DC    C'RELOGON SUCCESSFUL'                                @07 08510001
+R#MSG05  DC    C'RELOGON REQUEST DENIED'                            @07 08520001
+*                                                                       08530001
+*        OMUCHECK WORK AREA,  ADD VARIABLES AS NEEDED.              @03 08540001
+*                                                                   @03 08550001
+* NOTE:  THE OMUCHECK WORK AREA IS A DSECT.  THE MAXIMUM SIZE OF    @03 08560001
+*        OF THIS WORK AREA, INCLUDING THE FIELDS ALREADY DEFINED    @03 08570001
+*        BELOW (E.G., M#SW1, M#SRET, ETC.), IS 512 BYTES.           @18 08580001
+*                                                                   @03 08590001
+*        DO NOT EXCEED THIS 512-BYTE LIMIT!  ESSENTIAL OMEGAMON     @03 08600001
+*        CONTROL BLOCKS WILL BE OVERLAID WITH UNPREDICTABLE         @03 08610001
+*        RESULTS IF THIS 512-BYTE LIMIT IS EXCEEDED.                @03 08620001
+*                                                                   @03 08630001
+*        IF YOU REQUIRE A WORK AREA LARGER THAN 512 BYTES,          @03 08640001
+*        GETMAIN THE NECESSARY STORAGE AND PLACE THE POINTER TO     @03 08650001
+*        THIS GETMAINED STORAGE IN THE OMUCHECK WORK AREA.          @03 08660001
+*                                                                   @03 08670001
+*        BE SURE TO FREEMAIN THIS STORAGE DURING THE TERMINATION    @03 08680001
+*        PHASE.                                                     @03 08690001
+*                                                                       08700001
+         $UCHECK ,                                                      08710001
+         ORG   U#CHUSER              GO TO USER AREA                    08720001
+         DS    0D                    ALIGNMENT                      @18 08730001
+M#RRWAI  DS    CL4                   RACROUTE WORKAREA EYECATCHER   @18 08740001
+M#RRWA   DS    A                     RACROUTE WORKAREA POINTER      @18 08750001
+M@RRWAL  EQU   512                   RACROUTE WORKAREA LENGTH       @18 08760001
+M#SW1    DS    X                                                        08770001
+M@SW1AUT EQU   B'10000000'            AUTHORIZED                        08780001
+M#PWTIME DS    H                     NUMBER OF PASSWORD ATTEMPTS        08790001
+M#SRET   DS    F                     REQUEST=STAT RETURN CODE       @18 08800001
+M#ARET   DS    F                     REQUEST=AUTH RETURN CODE       @18 08810001
+M#VRET   DS    F                     REQUEST=VERIFY RETURN CODE     @18 08820001
+M#FRET   DS    F                     REQUEST=VERIFY W/FREE/DELETE   @18 08830001
+M#RRET   DS    F                     RELOGON'S RETURN CODE          @18 08840001
+M#SAFRET DS    F                     SAF RETURN CODE                @18 08850001
+M#SCR32X DS    CL36                  32 CHAR SCRATCH ENTITYX FORMAT @18 08860001
+         DS    0F                                                       08870001
+M#RRSL   DS    XL(RRSMDLL)           STAT REQUEST MODEL             @18 08880001
+         ORG   M#RRSL                USE SAME AREA                  @18 08890001
+M#RRAL   DS    XL(RRAMDLL)           AUTH REQUEST MODEL             @18 08900001
+         ORG   M#RRSL                USE SAME AREA                  @18 08910001
+M#RRFL   DS    XL(RRFMDLL)           VERIFY WITH DELETE/FREE MODEL  @18 08920001
+         ORG   M#RRSL                USE SAME AREA                  @18 08930001
+M#RRVL   DS    XL(RRVMDLL)           VERIFY MODEL                   @18 08940001
+         ORG   ,                                                        08950001
+*********************************************************************** 08960001
+*                                                                     * 08970001
+*                        I M P O R T A N T ! ! !                      * 08980001
+*                                                                     * 08990001
+*   IF THE FOLLOWING STORAGE DEFINITION STATEMENT IS FLAGGED AS AN    * 09000001
+*   ERROR, THIS MEANS YOU HAVE EXCEEDED THE MAXIMUM ALLOWABLE SIZE    * 09010001
+*   OF THE USER WORK AREA.  THE MAXIMUM ALLOWABLE SIZE IS 512 BYTES.  * 09020001
+*                                                                     * 09030001
+*                                                                     * 09040001
+*********************************************************************** 09050001
+*                                                                       09060001
+M#VERFY  DS    (U@CHLEN-(*-$UCHECK))X    VERIFY SIZE WITHIN LIMIT       09070001
+*                                                                       09080001
+*        REGISTER EQUATES                                               09090001
+*                                                                       09100001
+R0       EQU   0                                                        09110001
+R1       EQU   1                                                        09120001
+R2       EQU   2                                                        09130001
+R3       EQU   3                                                        09140001
+R4       EQU   4                                                        09150001
+R5       EQU   5                                                        09160001
+R6       EQU   6                                                        09170001
+R7       EQU   7                                                        09180001
+R8       EQU   8                                                        09190001
+R9       EQU   9                                                        09200001
+RA       EQU   10                                                       09210001
+RB       EQU   11                                                       09220001
+RC       EQU   12                                                       09230001
+RD       EQU   13                                                       09240001
+RE       EQU   14                                                       09250001
+RF       EQU   15                                                       09260001
+         ICHSAFP ,                                                  @18 09270001
+******************************************************************@12   09280001
+*   $BIA DSECT                                                    @12   09290001
+*                                                                 @12   09300001
+*   BASE INFORMATION AREA.                                        @12   09310001
+*                                                                 @12   09320001
+******************************************************************@12   09330001
+$BIA     DSECT                                                          09340001
+*                                                                       09350001
+B#BIA    DS    0F                                                       09360001
+*                                                                       09370001
+B#DDPRFX DS    CL2            PRODUCT PREFIX - OM, OC, OI, ETC.         09380001
+B#OMMODE DS    CL3            MODE OF OPERATION - DED, TSO, ETC.        09390001
+B#PMSYS  DS    CL4            SYSTEM ID                                 09400001
+B#PMUSER DS    CL2            USER MODULE SUFFIX ID                     09410001
+         DS    X              *** RESERVED ***                          09420001
+         SPACE 1                                                        09430001
+B#ROWCTP DS    F              PHYSICAL NUMBER OF ROWS (BINARY)          09440001
+B#ROWCTL DS    F              LOGICAL NUMBER OF ROWS (BINARY)           09450001
+B#COLCT  DS    F              NUMBER OF COLUMNS (BINARY)                09460001
+         SPACE 1                                                        09470001
+B#BASVER DS    CL3            BASE VERSION NUMBER OF PRODUCT            09480001
+B#BASLEV DS    CL3            EXECUTION LEVEL OF BASE                   09490001
+         SPACE 1                                                        09500001
+**  OBVTAM IDENTIFIER IS VALID FOR      **                              09510001
+**  B#OMMODE VALUES VTM, VTD, VTT, VTS  **                              09520001
+B#OBVTID DS    0CL12          OBVTAM IDENTIFIER:                        09530001
+B#VTACB  DS    CL8             OBVTAM ACB NAME                          09540001
+B#VTSMF  DS    CL4             OBVTAM HOST SMFID                        09550001
+         SPACE 1                                                        09560001
+         DS    CL14           *** RESERVED ***                          09570001
+         SPACE 1                                                        09580001
+B@BIAL   EQU   (*-B#BIA)      LENGTH OF $BIA                            09590001
+*********************************************************************** 09600001
+*   O2PIA DSECT                                                    @14A 09610001
+*                                                                  @14A 09620001
+*   THIS DSECT IS POINTED TO BY FIELD U#CHPIA IN THE #CHECK MACRO. @14A 09630001
+*                                                                  @14A 09640001
+*******************************************************************@14A 09650001
+O2PIA    DSECT ,                                                   @14A 09660001
+O2PIAEYE DS    CL8               'O2PIA' EYECATCHER                @14A 09670001
+O2PIALEN DS    F                 LENGTH OF WORKAREA                @14A 09680001
+O2PIASSI DS    CL4               DB2 SUBSYSTEM ID                  @14A 09690001
+         DS    20F               RESERVED                          @14A 09700001
+O2PNDEYE DS    CL8               'O2PIA' EYECATCHER                @14A 09710001
+O2PIAEND EQU   *-O2PIA                                             @14A 09720001
+*                                                                       09730001
+         END   OM$URACF                                                 09740001

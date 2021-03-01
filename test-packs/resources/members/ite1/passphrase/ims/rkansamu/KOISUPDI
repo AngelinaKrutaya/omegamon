@@ -1,0 +1,111 @@
+*      O M E G A M O N  --   --  SECURITY INSTALLATION                *
+*                                                                     *
+*---------------------------------------------------------------------*
+*---------------------------------------------------------------------*
+* NOTE:  CUSTOMIZE THE SAMPLE KOISUPDI
+*
+*        SAMPLE JCL TO INSTALL THESE SECURITY OPTIONS MAY BE FOUND
+*        IN RHILEV.RKANSAMU(KOISUPD).
+*
+*        NO ASSEMBLY OR LINKEDITING IS REQUIRED, AS ONLY CONTROL
+*        STATEMENT INPUT IS PROCESSED.
+*---------------------------------------------------------------------*
+*---------------------------------------------------------------------*
+*
+*---------------------------------------------------------------------*
+*        TO USE EXTERNAL SECURITY (ACF2, RACF, OR TOP-SECRET),        *
+*        THE APPROPRIATE "MODULE=" STATEMENT BELOW.                   *
+*        z/OS NAMING CONVENTIONS FOR LOAD MODULES.                    *
+*                                                                     *
+*        FOR ACF2 UNCOMMENT THE FOLLOWING STATEMENT:                  *
+*            MODULE=KOIACF2X                                          *
+*                                                                     *
+*        FOR RACF OR TOP-SECRET UNCOMMENT THE FOLLOWING STATEMENT:    *
+*            MODULE=KOIRACFX                                          *
+             MODULE=
+*---------------------------------------------------------------------*
+*
+*---------------------------------------------------------------------*
+*        IF SMF AUDITING OF SELECTED COMMANDS IS DESIRED, A VALID     *
+*        SMF RECORD ID NUMBER BETWEEN 128 AND 255 (INCLUSIVE) MUST    *
+*        BE SPECIFIED.  ENSURE THAT OMEGAMON IS THE ONLY APPLICATION  *
+*        USING THIS SMF RECORD ID NUMBER.  ALSO, ENSURE THAT THE SMF  *
+*        RECORD EXITS (IEFU83 AND IEFU84) AND THE SMF SYSTEM PARMS    *
+*        SPECIFICATIONS (SMFPRMXX) DO NOT SUPPRESS THE SPECIFIED SMF  *
+*        RECORD ID NUMBER.                                            *
+*---------------------------------------------------------------------*
+    SMFNUM=
+*
+*---------------------------------------------------------------------*
+*        THE 'AUTHORIZED SCREEN SPACE LIBRARY' IS USED TO FETCH       *
+*        SCREEN SPACES CONTAINING AUTHORIZED COMMANDS FOR             *
+*        EXECUTION AT OMEGAMON INITIALIZATION.                        *
+*---------------------------------------------------------------------*
+    AUTHLIB=RHILEV.RKOIPROC,VOL=NOVOLUME
+*
+*---------------------------------------------------------------------*
+*        THE PASSWORD IS ENTERED BY USING THE /PWD INFO LINE COMMAND. *
+*        AN AUTHORITY LEVEL IS SET TO THE CORRESPONDING PASSWORD. TO  *
+*        CLEAR THE AUTHORITY LEVEL TO ZERO, USE PA1, ENTER AN INVALID *
+*        PASSWORD, OR ENTER A PASSWORD OF BLANK(S).                   *
+*---------------------------------------------------------------------*
+    PASSWORD=OMEGAM1,LEVEL=1
+    PASSWORD=OMEGAM2,LEVEL=2
+    PASSWORD=OMEGAM3,LEVEL=3
+*
+*---------------------------------------------------------------------*
+*        THE FOLLOWING STATEMENTS DEFINE THE AUTHORITY (PASSWORD)     *
+*        LEVEL REQUIRED TO EXECUTE THE VARIOUS COMMANDS AND           *
+*        THEIR MINORS                                                 *
+*                                                                     *
+*        COMMAND AUTHORIZATION LEVELS ARE THE SAME AS THEY WERE       *
+*        IN PREVIOUS RELEASES, WITH THE ADDITION OF ANY NEW           *
+*        AUTHORIZED COMMANDS.                                         *
+*                                                                     *
+*      ACCESS TO MINOR COMMANDS IS GRANTED VIA THEIR MAJOR.           *
+*      THERE IS NO WAY OF ACCESSING A COMMAND'S MINORS                *
+*      UNLESS THE USER HAS ACCESS TO ITS MAJOR. THEREFORE, IT         *
+*      IS UNNECESSARY TO PROTECT MINORS OF PROTECTED MAJORS           *
+*      UNLESS THE MINORS ARE TO HAVE A HIGHER PROTECTION              *
+*      LEVEL THAN THEIR ASSOCIATED MAJOR.                             *
+*                                                                     *
+*      NOTE: IF YOU CHANGE THE SECURITY LEVEL TO 2 OR 3 FOR THE XACB  *
+*            COMMAND, YOU WILL EXPERIENCE PROBLEMS WITH THE CUA       *
+*            INTERFACE.  IF YOU DO NOT USE THE CUA INTERFACE, THEN    *
+*            THERE IS NO RESTRICTION ON THE XACB SECURITY LEVEL.      *
+*                                                                     *
+*---------------------------------------------------------------------*
+    COMMAND=CONS,LEVEL=3
+    COMMAND=CONU,LEVEL=3
+    COMMAND=DYNA,LEVEL=3,EXTERNAL=NO,AUDIT=NONE
+    COMMAND=DYNU,LEVEL=3,EXTERNAL=NO,AUDIT=NONE
+    COMMAND=ICMD,LEVEL=3,EXTERNAL=YES,AUDIT=NONE
+    COMMAND=ICNS,LEVEL=3,EXTERNAL=NO,AUDIT=NONE
+    COMMAND=ILST,LEVEL=3,EXTERNAL=NO,AUDIT=NONE
+    COMMAND=ISCN,LEVEL=3,EXTERNAL=NO,AUDIT=NONE
+    COMMAND=IZAP,LEVEL=3,EXTERNAL=NO,AUDIT=NONE
+    COMMAND=MCHN,LEVEL=3
+    COMMAND=MDEF,LEVEL=3
+    COMMAND=MLOG,LEVEL=3,EXTERNAL=NO,AUDIT=NONE
+    COMMAND=MLST,LEVEL=3
+    COMMAND=MSCN,LEVEL=3
+    COMMAND=MZAP,LEVEL=3
+    COMMAND=OCMD,LEVEL=3
+    COMMAND=OSPC,LEVEL=3
+    COMMAND=PEEK,LEVEL=3
+    COMMAND=SCHN,LEVEL=3
+    COMMAND=SLST,LEVEL=3
+    COMMAND=SSCN,LEVEL=3
+    COMMAND=SZAP,LEVEL=3
+    COMMAND=XMCH,LEVEL=3
+    COMMAND=XMLS,LEVEL=3
+    COMMAND=XMSC,LEVEL=3
+    COMMAND=XMZP,LEVEL=3
+    COMMAND=.DSA,LEVEL=3,EXTERNAL=NO,AUDIT=NONE
+*
+*
+*---------------------------------------------------------------------*
+*    PRODUCE A FULL LISTING                                           *
+*---------------------------------------------------------------------*
+*
+LIST=YES

@@ -1,0 +1,45 @@
+*
+*     KOIVTMM0 - START THE OMEGAMON/IMS VTAM
+*                APPLICATION
+*
+*
+*     KEYWORD    DESCRIPTION
+*    -----------------------------------------------------------------
+*
+*     UMAX          MAXIMUM NUMBER OF ITE1OI0
+*                   USERS
+*     APPL          APPLID TO BE OPENED
+*  #  LROWS         DEFAULT NUMBER OF LOGICAL ROWS
+*  #  GLOBAL=XX     SUFFIX FOR KOIGBLXX MODULE
+*                   NOTE: IMS DBCTL USERS SHOULD CHANGE GLOBAL=XX
+*                   AND BUILD ANOTHER KOIGBLXX MODULE BY FOLLOWING
+*                   THE INSTRUCTIONS IN THE CUSTOMIZATION GUIDE.
+*                   INITIALLY, GLOBAL=88 IS THE SUGGESTED CHOICE.
+*  #  USER=XX       SUFFIX FOR USER PROFILE
+*  #  PSWD          PASSWORD OF THE VTAM APPLID TO BE OPENED
+*  #  FOLD=X        SPECIFIES WHETHER (Y, THE DEFAULT) OR NOT (N)
+*                   THE PASSWORD FOR SIGNING ON TO VTAM SHOULD BE
+*                   FOLDED TO UPPERCASE.
+*  #  TIMEOUT=0/NN  LENGTH OF TIME VTAM MODE SESSION CAN REMAIN IDLE
+*                   BEFORE CANCELLED BY OMEGAMON. 0 (DEFAULT) INDICATES
+*                   DISABLE TIMEOUT FEATURE. NN IS THE NUMBER OF
+*                   MINUTES A SESSION CAN REMAIN IDLE BEFORE
+*                   TERMINATION.
+*
+*  #  OPTIONAL KEYWORDS; THE REST ARE REQUIRED FOR
+*     ITE1OI0
+*
+*     IF IN YOUR VTAM ENVIRONMENT YOU CHOOSE TO USE AN APPLID OTHER
+*     THAN ITE1OI0
+*     FOR YOUR VTAM MODE OMEGAMON/IMS SESSIONS, YOU SHOULD SUPPLY
+*     YOUR OWN VTAM APPLID IN THE "APPL=" KEYWORD.
+*
+START OIVTAM,                                                          X
+               DATA=YES,                                               X
+               LROWS=999,                                              X
+*   GLOBAL=M0,                                                         X
+               TIMEOUT=30,                                             X
+               USER=/C,                                                X
+               FOLD=Y,                                                 X
+               UMAX=99,                                                X
+               APPL=ITE1OI0

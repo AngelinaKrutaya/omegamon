@@ -1,0 +1,179 @@
+PROC 0 TSO                          +
+       FSCR()                       +
+       LROWS(99)                    +
+       SYS(SMFID)                   +
+       DEBUG                        +
+       CICS(CICQ55Z1)               +
+       OCAPPL(ITE1OC0)              +
+       OCLOAD(ITM.ITE.BASE.RKANMOD) +
+      OCLOADU(ITM.ITE.ITE1.RKANMODU)+
+       PSWD()                       +
+       FOLD(Y)                      +
+       USER()
+/*INDEX TSO CLIST */
+/*************************************************************/
+/* ADD MIXED CASED PSWD SUPPORT    OA22179 10/17/07          */
+/*************************************************************/
+/*************************************************************/
+/*                                                           */
+/*                    N O T E                                */
+/*                                                           */
+/*  FOR TSO MODE KOCLIST AND KOCLIST1 MUST BE COPIED TO YOUR */
+/*  CLIST DATASET IN SYSPROC CONCATENATION.                  */
+/*  FOR ISPF MODE, KOCLIST, KOCLIST2, KOCLIST3 AND KOCLIST4  */
+/*  MUST BE COPIED TO YOUR CLIST DATASET IN SYSPROC          */
+/*  CONCATENATION. ALSO MEMBERS KOCSPF01, KOCSPF02, KOCSPF03 */
+/*  AND KOCSPF05 MUST BE COPIED TO YOUR ISPF PANEL DATASET   */
+/*  IN ISPPLIB CONCATENATION.                                */
+/*                                                           */
+/*  KOCLIST DOES NOT SUPPORT DIRECTOR PROCESSING             */
+/*  USING VTAM SESSIONS RUNNING UNDER TSO OR ISPF.           */
+/*                                                           */
+/*  FOR VTAM MODE UNDER TSO OR ISPF, PLEASE MAKE SURE THAT   */
+/*  THE VIRTUAL TERMINAL POOL IS ACTIVATED.  ALSO NOTE       */
+/*  THAT IF OBVTAM IS NOT ACTIVE OR REACHES UMAX, A SESSION  */
+/*  WILL NOT BE ESTABLISHED.                                 */
+/*                                                           */
+/*************************************************************/
+/*                                                           */
+/*    O M E G A M O N  /  T S O  &  S P F  M O D E           */
+/*                   M A S T E R   C L I S T                 */
+/*                                                           */
+/*   TSO     - INVOKE OMEGAMON II FOR CICS UNDER TSO         */
+/*                                                           */
+/*   OCAPPL  - THE TARGET OMEGAMON II FOR CICS COLLECTOR VTAM*/
+/*             APPLID TO START A SESSION WITH                */
+/*                                                           */
+/*   CICS    - JOBNAME OF THE CICS REGION TO BE MONITORED    */
+/*                                                           */
+/*   FSCR    - FIRST SCREEN SPACE, DEFAULT FROM USER PROFILE */
+/*                                                           */
+/*   LROWS   - NUMBER OF LOGICAL ROWS FOR SCROLLING          */
+/*                                                           */
+/*   SYS     - SYSTEM ID, DEFAULT TO SMFID                   */
+/*                                                           */
+/*   OCLOAD  - FULLY QUALIFIED NAME OF OMEGAMON II FOR CICS  */
+/*             LOAD LIBRARY (DO NOT SPECIFY NAME IN QUOTES). */
+/*             THIS MUST BE RHILEV.RTE.RKANMOD IF THE RUNTIME*/
+/*             ENVIRONMENT IS CONFIGURED AS A FULL RTE OR IT */
+/*             MUST BE HILEV.TKANMOD IF YOUR RUNTIME         */
+/*             ENVIRONMENT IS CONFIGURED TO SHARE WITH THE   */
+/*             TARGET SMP LIBRARIES.                         */
+/*                                                           */
+/*   OCLOADU - FULLY QUALIFIED NAME OF OMEGAMON II FOR CICS  */
+/*             LOAD LIBRARY (DO NOT SPECIFY NAME IN QUOTES). */
+/*             THIS MUST BE OF THE FORM RHILEV.RTE.RKANMODU. */
+/*                                                           */
+/*   USER    - 2-DIGIT USER PROFILE SUFFIX                   */
+/*                                                           */
+/*   PSWD    - PASSWORD REQUIRED BY THE TARGET OMEGAMON II   */
+/*             APPLICATION.                                  */
+/*                                                           */
+/*   FOLD    - SET PASSWORD FOLD OPTION (DEFAULT=Y)          */
+/*                                                           */
+/*   DEBUG   - SET DEBUG MODE FOR KOCLIST CLISTS             */
+/*                                                           */
+/*************************************************************/
+/*                                                           */
+/*   IF TSO IS SPECIFIED, A SESSION IS ESTABLISHED WITH      */
+/*   OMEGAMON II FOR CICS FOR A TSO ENVIRONMENT. IF IT IS NOT */
+/*   SPECIFIED, AN OMEGAMON II FOR CICS SESSION IS ESTABLISHED*/
+/*   ISPF MODE, AND A PANEL IS PRESENTED TO THE USER TO      */
+/*   ENABLE THE ASSIGNMENT OF PF KEYS AND THE ESTABLISHMENT  */
+/*   OF OMEGAMON II FOR CICS SESSIONS.                       */
+/*                                                           */
+/*   IF YOU HAVE ANY QUESTIONS OR NEED MORE INFORMATION,     */
+/*   PLEASE CONTACT IBM SOFTWARE SUPPORT.                    */
+/*                                                           */
+/*************************************************************/
+
+CONTROL ASIS
+
+/*-------------------------------------------------------*/
+/* SET DEBUG MODE FOR OBCLIST & VTM1 DRIVER IF REQUESTED */
+/*-------------------------------------------------------*/
+
+IF &DEBUG = DEBUG THEN CONTROL LIST CONLIST SYMLIST MSG
+
+/*-------------------------------------------------------*/
+/*    DEFINE GLOBAL VARIABLES                            */
+/*-------------------------------------------------------*/
+
+GLOBAL OCUSR   +
+       LROW#   +
+       SYSID   +
+       DBUG    +
+       CICSJN  +
+       OCAPL   +
+       OCLOD   +
+       OCLODU  +
+       FSCRN   +
+       OCFOLD  +
+       OCPSWD
+
+/*-------------------------------------------------------*/
+/*    SET VALUES FOR TSO GLOBAL VARIABLES                */
+/*-------------------------------------------------------*/
+
+
+IF &TSO = TSO OR &SYSISPF ^=ACTIVE THEN DO
+   SET OCUSR   = &STR(&USER)
+   SET FSCRN   = &FSCR
+   SET LROW#   = &LROWS
+   SET SYSID   = &SYS
+   SET DBUG    = &DEBUG
+   SET CICSJN  = &CICS
+   SET OCAPL   = &OCAPPL
+   SET OCLOD   = &OCLOAD
+   SET OCPSWD  = &PSWD
+   SET OCFOLD  = &FOLD
+   SET OCLODU  = &OCLOADU
+END
+
+/*-------------------------------------------------------*/
+/*    SET VALUES FOR ISPF GLOBAL VARIABLES               */
+/*-------------------------------------------------------*/
+
+IF &SYSISPF = ACTIVE AND &TSO ^=TSO THEN DO
+   SET CMDPARMS = +
+    LROWS(&LROWS) +
+    SYS(&SYS) +
+    OCAPPL(&OCAPPL) +
+    OCLOAD(&OCLOAD) +
+    OCLOADU(&OCLOADU) +
+    CICS(&CICS)
+    IF &DEBUG = DEBUG THEN +
+       SET CMDPARMS = &CMDPARMS DEBUG
+    IF &FSCR ^= THEN +
+       SET CMDPARMS = &CMDPARMS FSCR(&FSCR)
+    IF &STR(&USER) ^= THEN +
+       SET CMDPARMS = &CMDPARMS USER(&STR(&USER))
+    IF &STR(&PSWD) ^= THEN +
+       SET CMDPARMS = &CMDPARMS PSWD(&STR(&PSWD))
+    IF &STR(&FOLD) ^= THEN +
+       SET CMDPARMS = &CMDPARMS FOLD(&STR(&FOLD))
+END
+
+/*---------------------------------------------------------*/
+/*    SET UP OMEGAMON SESSION THROUGH OBVTAM UNDER TSO     */
+/*---------------------------------------------------------*/
+
+   IF &TSO = TSO OR &SYSISPF ^= ACTIVE THEN DO
+      %KOCLIST1
+      EXIT
+   END
+
+/*---------------------------------------------------------*/
+/*    SET UP OMEGAMON SESSION THROUGH OBVTAM UNDER ISPF    */
+/*---------------------------------------------------------*/
+
+IF &SYSISPF = ACTIVE AND &TSO = THEN DO
+      ISPEXEC SELECT CMD(KOCLIST2 &CMDPARMS) +
+       NEWAPPL(OMEG) PASSLIB
+      EXIT
+END
+
+/*-----------------------------------------------------------*/
+/*    END OF KOCLIST                                         */
+/*-----------------------------------------------------------*/
+

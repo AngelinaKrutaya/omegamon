@@ -1,0 +1,84 @@
+/*------------------------------------------------------------------*/
+/* Licensed Materials - Property of IBM                             */
+/* 5698-B49, 5698-A33, 5698-A34, 5698-A37, 5655-W37,                */
+/* 5655-W38                                                         */
+/* * Copyright Rocket Software Inc. 2019 All rights reserved *      */
+/* Copyright IBM Corporation 2019.  All rights reserved             */
+/*                                                                  */
+/* US Government Users Restricted Rights - Use, duplication or      */
+/* disclosure restricted by GSA ADP Schedule Contract with IBM Corp.*/
+/*-------------------------- UA69205 -------------------------------*/
+/*  YYYY-MM-DD WHO FLG Description                                  */
+/*  ---------- --- --- ---------------------------------------------*/
+/*  2019-07-31 MC      Initial development                          */
+/*                        (APAR# OA57511)                           */
+/*                                                                  */
+/********************************************************************/
+/*                                                                  */
+/* CUSTOMER DEFINITIONS                                             */
+/*                                                                  */
+/* This PDS member is provided in a runtime and/or SMP/E target     */
+/* dataset, &rhilev.&rte.RKOBDATF pointed to by the RKOBPROF DD     */
+/* statement in the Enhanced 3270UI started task JCL proc.          */
+/* Do not modify this PDS member in the xKOBDATF Dataset. It        */
+/* should be copied to the &rhilev.&rte.UKOBDATF dataset for        */
+/* modification.                                                    */
+/*                                                                  */
+/* This PDS member defines the e3720UI multi-tenancy customers      */
+/* You may define up to 100 customers, each with a unique Customer  */
+/* ID for each OMEGAMON, you can define a Managed System List       */
+/* (Group) that you have defined using the Object Editor. If you    */
+/* do not have a particular OMEGAMON, simply don't define it.       */
+/*                                                                  */
+/********************************************************************/
+
+CUSTOMER:CUST1CL10,
+CUSTNAME:"Full Customer Description up to 50 Characters",
+ZOS="t_m5_CUSTOMER1",
+CICS="t_c5_CUSTOMER1",
+IMS="t_i5_CUSTOMER1",
+DB2="T_d5_CUSTOMER1",
+CTG="t_gw_CUSTOMER1",
+MQ="T_mq_CUSTOMER1",
+STOR="T_s3_CUSTOMER1",
+MFN="T_n3_CUSTOMER1",
+JAVA="T_jj_CUSTOMER1"
+
+CUSTOMER:CUST2CL10,
+CUSTNAME:"Full Customer Description up to 50 Characters",
+ZOS="t_m5_CUSTOMER2",
+CICS="t_c5_CUSTOMER2",
+IMS="t_i5_CUSTOMER2",
+DB2="T_d5_CUSTOMER2",
+CTG="t_gw_CUSTOMER2",
+MQ="T_mq_CUSTOMER2",
+STOR="T_s3_CUSTOMER2",
+MFN="T_n3_CUSTOMER2",
+JAVA="T_jj_CUSTOMER2"
+
+CUSTOMER:Corp1,
+CUSTNAME:"Corp1 DB2 V11 only                            END",
+ZOS="t_m5_CUSTOMER2",
+CICS="t_c5_CUSTOMER2",
+IMS="t_i5_CUSTOMER2",
+DB2="T_D5_Corp1",
+CTG="t_gw_CUSTOMER2",
+MQ="T_mq_CUSTOMER2",
+STOR="T_s3_CUSTOMER2",
+MFN="T_n3_CUSTOMER2",
+JAVA="T_jj_CUSTOMER2"
+
+CUSTOMER:Corp2,
+CUSTNAME:"Corp2 DB2 V12 only                            END",
+ZOS="t_m5_CUSTOMER2",
+CICS="t_c5_CUSTOMER2",
+IMS="t_i5_CUSTOMER2",
+DB2="T_D5_?",
+CTG="t_gw_CUSTOMER2",
+MQ="T_mq_CUSTOMER2",
+STOR="T_s3_CUSTOMER2",
+MFN="T_n3_CUSTOMER2",
+JAVA="T_jj_CUSTOMER2"
+/********************************************************************/
+/*         END OF DEFINITIONS                                       */
+/********************************************************************/

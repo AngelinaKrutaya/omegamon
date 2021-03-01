@@ -1,0 +1,58 @@
+/*------------------------------------------------------------------*/
+/* Licensed Materials - Property of IBM                             */
+/* 5698-B49, 5698-A33, 5698-A34, 5698-A37, 5655-W37,                */
+/* 5655-W38                                                         */
+/* * Copyright Rocket Software Inc. 2019 All rights reserved *      */
+/* Copyright IBM Corporation 2019.  All rights reserved             */
+/*                                                                  */
+/* US Government Users Restricted Rights - Use, duplication or      */
+/* disclosure restricted by GSA ADP Schedule Contract with IBM Corp.*/
+/*-------------------------- UA69205 -------------------------------*/
+/*  YYYY-MM-DD WHO FLG Description                                  */
+/*  ---------- --- --- ---------------------------------------------*/
+/*  2019-07-31 MC      Initial development                          */
+/*                        (APAR# OA57511)                           */
+/*                                                                  */
+/********************************************************************/
+/*                                                                  */
+/* USERID DEFINITIONS                                               */
+/*                                                                  */
+/* This PDS member is provided in a runtime and/or SMP/E target     */
+/* dataset, &rhilev.&rte.RKOBDATF pointed to by the RKOBPROF DD     */
+/* statement in the Enhanced 3270UI started task JCL proc.          */
+/* Do not modify this PDS member in the xKOBDATF Dataset. It        */
+/* should be copied to the &rhilev.&rte.UKOBDATF dataset for        */
+/* modification.                                                    */
+/*                                                                  */
+/* This PDS member defines the e3720UI multi-tenancy User IDs.      */
+/* You may define up to 1000 IDs, each one being a valid TSO User   */
+/* ID. For each User ID, you may specifiy an associated group ID,   */
+/* and associated customer ID.                                      */
+/*                                                                  */
+/* If you are not defined as a Super User, then you will need an    */
+/* associated customer ID. If you are defined as a Super User, then */
+/* logging on will be the same as not running in Multi-tenancy mode.*/
+/*                                                                  */
+/* The Users shown below are just examples; you may create your own */
+/*                                                                  */
+/********************************************************************/
+
+USERID:TS5813A GROUP:TDB2 SUPER:NO  CUSTOMER=Corp1
+USERID:TS5701A GROUP:TDB2 SUPER:NO  CUSTOMER=Corp2
+USERID:TS6257 GROUP:OMEGCICS SUPER:NO  CUSTOMER=PAYROLL
+
+USERID:TS6257  GROUP:OMEGALL  SUPER:YES
+USERID:TS5813  GROUP:OMEGALL  SUPER:NO
+USERID:TS5701  GROUP:OMEGALL  SUPER:NO
+USERID:TS6257A GROUP:OMEGCICS SUPER:NO  CUSTOMER=ACMECORP
+
+USERID:JUAN01 GROUP:OMEGALL SUPER:YES
+USERID:JENS01 GROUP:OMEGZOS SUPER:YES
+
+USERID:TS6257A GROUP:OMEGCICS SUPER:NO CUSTOMER:CONGLOMO
+
+USERID:TS6261 GROUP:OMEGIMS SUPER:YES CUSTOMER:NONE
+
+/********************************************************************/
+/*          END OF DEFINITIONS                                      */
+/********************************************************************/

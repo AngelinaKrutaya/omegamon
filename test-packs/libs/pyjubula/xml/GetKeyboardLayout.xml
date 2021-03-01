@@ -1,0 +1,6 @@
+<org.eclipse.jubula.communication.internal.message.GetKeyboardLayoutNameMessage>
+    <m__messageId>
+        <m__sequenceNumber>{{message_number}}</m__sequenceNumber>
+        <m__timestamp>{{message_timestamp}}</m__timestamp>
+    </m__messageId>
+</org.eclipse.jubula.communication.internal.message.GetKeyboardLayoutNameMessage>

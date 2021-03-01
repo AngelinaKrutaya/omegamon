@@ -1,0 +1,113 @@
+pipeline{
+    agent none
+     stages{
+        stage('Remove allure history'){
+            steps{
+                script {
+                    try {
+                        bat "rmdir /Q /S \"$WORKSPACE/test-packs/reports/allure-report\""
+                    } catch (Exception e) {}
+                }
+            }
+        }
+        stage('Create folder for allure report'){
+            steps{
+                script {
+                    try {
+                        bat "mkdir \"$WORKSPACE/test-packs/reports/allure-report\""
+                    } catch (Exception e) {}
+                }
+            }
+        }
+        stage('Update parmgen'){
+           steps{
+              script{
+                try {
+                    bat "cd %WORKSPACE%/test-packs/tests/parmgen && %USERPROFILE%/TAF/venv/Scripts/activate && pytest -s parmgen_0update.py --alluredir %WORKSPACE%/test-packs/reports/allure-report"
+                } catch (Exception e) {}
+            }
+           }
+        }
+        stage('Create archive for parmgen'){
+           steps{
+              script{
+                try {
+                    bat "cd %WORKSPACE%/test-packs/tests/parmgen && %USERPROFILE%/TAF/venv/Scripts/activate && pytest -s parmgen_1archive.py --alluredir %WORKSPACE%/test-packs/reports/allure-report"
+                } catch (Exception e) {}
+            }
+           }
+        }
+        stage('Regression'){
+            steps{
+               script{
+                try {
+                    bat "cd %WORKSPACE%/test-packs/tests/parmgen_regression && %USERPROFILE%/TAF/venv/Scripts/activate && pytest -s test_0regression.py --alluredir %WORKSPACE%/test-packs/reports/allure-report"
+                } catch (Exception e) {}
+            }
+            }
+        }
+        stage('Regression with changes parameters for itp1'){
+            environment {
+                rte = 'itp1'
+                is_new = 'false'
+            }
+            steps{
+                script{
+                try {
+                    bat "cd %WORKSPACE%/test-packs/tests/parmgen_regression && %USERPROFILE%/TAF/venv/Scripts/activate && pytest -s  test_changes_param.py --alluredir %WORKSPACE%/test-packs/reports/allure-report"
+                } catch (Exception e) {}
+                }
+            }
+        }
+        stage('Regression with changes parameters for itp4'){
+            environment {
+                rte = 'itp4'
+                is_new = 'false'
+            }
+            steps{
+                script{
+                try {
+                    bat "cd %WORKSPACE%/test-packs/tests/parmgen_regression && %USERPROFILE%/TAF/venv/Scripts/activate && pytest -s  test_changes_param.py --alluredir %WORKSPACE%/test-packs/reports/allure-report"
+                } catch (Exception e) {}
+                }
+            }
+        }
+        stage('Regression with changes parameters for itp5'){
+            environment {
+                rte = 'itp5'
+                is_new = 'true'
+            }
+            steps{
+                script{
+                try {
+                    bat "cd %WORKSPACE%/test-packs/tests/parmgen_regression && %USERPROFILE%/TAF/venv/Scripts/activate && pytest -s  test_changes_param.py --alluredir %WORKSPACE%/test-packs/reports/allure-report"
+                } catch (Exception e) {}
+                }
+            }
+        }
+         stage('Regression with changes parameters to fail'){
+            steps{
+                script{
+                try {
+                    bat "cd %WORKSPACE%/test-packs/tests/parmgen_regression && %USERPROFILE%/TAF/venv/Scripts/activate && pytest -s  test_changes_param_fail.py --alluredir %WORKSPACE%/test-packs/reports/allure-report"
+                } catch (Exception e) {}
+                }
+            }
+        }
+        }
+    post{
+            always {
+                script {
+                    allure([
+                        includeProperties: false,
+                        jdk: '',
+                        properties: [],
+                        reportBuildPolicy: 'ALWAYS',
+                        report : 'allure-report',
+                        results: [[path: "test-packs\\reports\\allure-report"]]
+                        ])
+                }
+            }
+
+    }
+   }

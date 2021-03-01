@@ -1,0 +1,333 @@
+//******************************************************************
+//* NAME: ITE1TOM TIVOLI OMEGAMON (TOM)
+//*
+//* PURPOSE: STARTED TASK PROCEDURE TO RUN A TOM
+//*  * THIS PROC IS CONFIGURED TO RUN THE FOLLOWING 3270 OMEGAMON:
+//*     IBM Tivoli OMEGAMON Enhanced 3270 User Interface
+//*     (OMEGAMON enhanced 3270UI)
+//*
+//******************************************************************
+//* Last $PARSE* run refresh:  OMEGAMON enhanced 3270UI
+//*                            version @ FMID HKOB750
+//******************************************************************
+//* Last PARMGEN maintenance refresh:
+//* ===================================================================
+//* PARMGEN Maintenance: FMID HKCI310 APAR OA56325 4Q18
+//* z/OS/ISPF Environment: z/OS:02.03.00 / ISPF:7.3
+//* ===================================================================
+//* Member: KCI$SST1
+//* Purpose:
+//*   WCONFIG(KCI$SST1) common PARMGEN accounting imbed is generated
+//*   in all ITE1* STCs in WKANSAMU
+//* Work Environment:
+//*   - WCONFIG: ITM.ITE.ITE1.WCONFIG
+//*   - WKANSAMU: ITM.ITE.ITE1.WKANSAMU
+//*   - GBL_USER_JCL: ITM.ITE.PARMGEN.JCL
+//*   - GBL_DSN_SYS1_PROCLIB: SYS1.PROCLIB
+//*   - GBL_TARGET_HILEV: ITM.ITE
+//* *****************************************************************
+//* USER SECTION: Edit WCONFIG(KCI$SST1) to customize user
+//*               accounting details accordingly.
+//* *****************************************************************
+//* ---------------- BEGIN - USER SECTION: OVERRIDE --------------- *
+//* Last updated by:
+//*TS5813GN JOB (ACCT),'KOBJPUPB - NAME',CLASS=A,
+//* MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID.,REGION=0M
+//***  0 0  RTE_NAME=ITE1 SYSMEMBER=KOBJPUPB
+//*** \_~_/ SYSJOBNAME=TS5813GN JOBPARM SYSAFF=RSD1
+//* SYSDATE: 2019/03/06
+//* ---------------- END   - USER SECTION: OVERRIDE --------------- *
+//******************************************************************
+//*
+//* NOTES:
+//* * TYPICAL SYMBOLIC PARAMETER VALUES ON THE PROC STATEMENT ARE:
+//*    SYS      = MID-LEVEL QUALIFIER OF RUNTIME ENVIRONMENT (RTE)
+//*    RHILEV   = HIGH-LEVEL QUALIFIER OF RUNTIME LIBRARIES
+//*               CONTAINING CUSTOMIZED MEMBERS
+//*    BASEHLEV = HIGH-LEVEL QUALIFIER OF READ-ONLY RUNTIME LIBRARIES
+//*               THIS PARAMETER HAS THE FOLLOWING FORMAT:
+//*               - "&thilev.T" (SMP/E TARGET) OR
+//*               - "&rhilev.&rtename.R" (BASE LIBRARIES FOR A
+//*                 FULL RTE OR A SHARING RTE)
+//*    DOUT     = DEBUGGING OUTPUT CLASS
+//*    SOUT     = LOG OUTPUT CLASS
+//*    FOLD     = FOLD PASSWORDS TO UPPER CASE.  DEFAULT IS FOLD=Y
+//*               (RTE_SECURITY_FOLD_PASSWORD_FLAG=Y SETTING IN
+//*               WCONFIG(ITE1) CONFIG PROFILE).
+//*
+//* * LEGEND:
+//* o Your customizations in WCONFIG RTE and global profiles:
+//* ===============    =================== =====================
+//* STC PROC symbol    RTE profile parm.   Value
+//* ===============    =================== =====================
+//*                    RTE_TYPE            SHARING
+//* RHILEV             RTE_HILEV           ITM.ITE
+//* RVHILEV            RTE_VSAM_HILEV      ITM.ITE
+//* SYS                RTE_NAME            ITE1
+//* BASEHLEV (1st part)RTE_HILEV (Full RTE)ITM.ITE
+//* BASEHLEV (2nd part)RTE_NAME  (Full RTE)ITE1
+//* BASEHLEV (1st part)RTE_X_HILEV_SHARING ITM.ITE
+//* BASEHLEV (2nd part)RTE_SHARE           BASE
+//* BASEHLEV (SMPSHR)  GBL_TARGET_HILEV    ITM.ITE
+//*
+//* * LIBRARY NAMING CONVENTION:
+//*    - UKpp*  = USER-DEFINED LIBRARIES CONCATENATED AHEAD OF
+//*               READ-ONLY RKpp* EQUIVALENT COPY OF THE TARGET
+//*               FOR EXAMPLE: UKANEXEC USER LIBRARY
+//*                            RKANEXEC READ-ONLY LIBRARY (TKANEXEC
+//*                            SMP/E TARGET COPY)
+//******************************************************************
+//E3270UI PROC RGN=0M,
+//   TIM=1440,MEMLIM=NOLIMIT,
+//          SYS=ITE1,
+//          RHILEV=ITM.ITE,
+//          BASEHLEV=ITM.ITE.BASE.R,
+//          USERCMDU=ITM.ITE.ITE1.RKANCMDU,
+//          USERPARU=ITM.ITE.ITE1.RKANPARU,
+//*   USERSAMU=ITM.ITE.ITE1.RKANSAMU,
+//* CONFIGDD=ITM.ITE.PARMGEN.JCL,
+//          SOUT=X,       LOG OUTPUT CLASS
+//          DOUT=X,       DEBUGGING OUTPUT CLASS
+//   MODE=CUA,
+//   APPL=ITE1OBAP,
+//   FOLD=Y,    FOLD PWDS TO UPPER CASE
+//   UMAX=100,     MAXIMUM 3270 SESSIONS
+//   PROD=KOBUI510,
+//   FSCR=KOBINIT,      FIRST SCREEN SPACE
+//   OM=KOBROUTR      NAME OF PROGRAM TO ATTACH
+//******************************************************************
+//* Specify "Y" to the RTE_X_STC_INAPF_INCLUDE_FLAG parameter in
+//* WCONFIG(ITE1) if you want the INAPF statement generated
+//* as uncommented out. ITE1APF member contains
+//* APF-authorization commands for libraries concatenated in the STC
+//* STEPLIB and RKANMODL DDNAMEs.  Review ITE1APF
+//* and ITE1STRT members for more information.
+//* Note: Operationally, the ITE1APF INCLUDE
+//*       member is called from SYS1.PROCLIB
+//*       as copied by the WKANSAMU(KCIJPSYS) job.
+//INAPF INCLUDE MEMBER=ITE1APF
+//******************************************************************
+//*
+//E3270UI EXEC PGM=KOBGATW0,
+//          REGION=&RGN,TIME=&TIM,MEMLIMIT=&MEMLIM,
+//          PARM=('MODE=&MODE,APPL=&APPL,FOLD=&FOLD,UMAX=&UMAX',
+//          'MULTI=Y',
+//          'PROD=&PROD,FSCR=&FSCR,OM=&OM')
+//STEPLIB   DD DISP=SHR,
+//          DSN=&RHILEV..&SYS..RKANMODU
+//          DD DISP=SHR,
+//          DSN=&BASEHLEV.KANMOD
+//          DD DISP=SHR,
+//          DSN=&BASEHLEV.KANMODP
+//******************************************************************
+//* Member: KOB$SST1
+//* Master Source: ITM.ITE.TKANSAM(KOBPRMLB)
+//* KCIJPUP1 or KCIJPCFG/KCIJPPRF Batch Job Output:
+//*   ITM.ITE.ITE1.IKANSAMU(KOB$SST1) - IBM Default
+//*   ITM.ITE.ITE1.WCONFIG(KOB$SST1)  - Customer Copy
+//* Purpose:
+//*   WCONFIG(KOB$SST1) STEPLIB DD override in the Tivoli OMEGAMON
+//*   (TOM) STC in WKANSAMU for OMEGAMON Enhanced 3270 User Interface
+//*   (OMEGAMON enhanced 3270UI) component.
+//* Instructions:
+//*   Add your STEPLIB DDNAME override(s) below, if any.
+//*   They will be concatenated in the TOM STC's STEPLIB DD in WKANSAMU.
+//* *****************************************************************
+//* USER SECTION: OVERRIDE FOR STEPLIB DD FOR ITE1TOM
+//* *****************************************************************
+//* ---------------- BEGIN - USER SECTION: OVERRIDE --------------- *
+//* ---------------- END   - USER SECTION: OVERRIDE --------------- *
+//********************************************************************
+//* TOM SYSOUT/SYSPRINT DDNAMEs:
+//* Note: KCIJPALO job allocates the SYSMDUMP dataset by default.
+//*       If you need a larger SYSMDUMP dataset, KCIJPALO job can be
+//*       used as a model to reallocate.  Modify the job accordingly.
+//********************************************************************
+//SYSOUT   DD SYSOUT=&SOUT
+//SYSPRINT DD SYSOUT=&SOUT
+//SYSTRACE DD SYSOUT=&DOUT
+//IDIOFF   DD DUMMY              * Disable Fault Analyzer for z/OS *
+//ABNLIGNR DD DUMMY              * Disable Abend-AID               *
+//******************************************************************
+//* Member: KOB$SDMP
+//* Master Source: ITM.ITE.TKANSAM(KOBPRMLB)
+//* KCIJPUP1 or KCIJPCFG/KCIJPPRF Batch Job Output:
+//*   ITM.ITE.ITE1.IKANSAMU(KOB$SDMP) - IBM Default Copy
+//*   ITM.ITE.ITE1.WCONFIG(KOB$SDMP)  - Customer Copy
+//******************************************************************
+//* SYS%DUMP-related DD:
+//******************************************************************
+//* ****************************************************************
+//* USER SECTION: Edit WCONFIG(KOB$SDMP) SYS%DUMP-related DD
+//*               imbedded in the ITE1TOM enhanced 3270UI
+//*               started task (STC). $PARSE* job imbeds this
+//*               member in the TOM STC.
+//* Note: KCIJPALO job allocates the SYSMDUMP dataset by default.
+//*       If you need a larger SYSMDUMP dataset, KCIJPALO job can be
+//*       used as a model to reallocate.  Modify the job accordingly.
+//*
+//*       Having a readily-available SYSMDUMP sequential dataset is
+//*       more useful for debugging as the output can be processed
+//*       using IPCS, or other tools.  Each STC requires a unique
+//*       SYSMDUMP dataset.
+//*
+//*       If overriding the default, a placeholder SYSUDUMP DD
+//*       pointing to spool datasets is also provided as an example,
+//*       if you prefer to store the data in the spool, instead of the
+//*       default SYSMDUMP sequential dataset.  If you wish to have a
+//*       SYSUDUMP DD instead of SYSMDUMP DD, modify the DDs
+//*       accordingly.  SYSMDUMP DD and SYSUDUMP DD are mutually
+//*       exclusive.
+//* ****************************************************************
+//* ---------------- BEGIN - USER SECTION: OVERRIDE -------------- *
+//SYSMDUMP DD DISP=SHR,
+// DSN=&RHILEV..&SYS..ITE1TOM
+//*SYSUDUMP DD SYSOUT=(&DOUT,,DUMP),FREE=CLOSE
+//* ---------------- END   - USER SECTION: OVERRIDE -------------- *
+//******************************************************************
+//********************************************************************
+//* TOM standard REXX libraries:
+//********************************************************************
+//RKANEXEC DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKANEXEC
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KANEXEC
+// DD DISP=SHR,
+// DSN=ITM.ITE.RSPLEXL4.XKANEXEC
+//RKANRXIN DD DUMMY
+//RKANRXLG DD SYSOUT=&SOUT
+//********************************************************************
+//* TOM parameter definitions:
+//********************************************************************
+//UKANPAR  DD DISP=SHR,
+//         DSN=&USERPARU
+//********************************************************************
+//* TOM standard Classic libraries:
+//********************************************************************
+//********************************************************************
+//* Standard RKANCMD/RKANPAR DDNAME concatenation:
+//********************************************************************
+//RKANCMD  DD DISP=SHR,
+//         DSN=&USERCMDU
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KANCMD
+//RKANPAR  DD DISP=SHR,
+//         DSN=&USERPARU
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KANPAR
+//********************************************************************
+//* TOM help definitions:
+//********************************************************************
+//UKANHENU DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKANHENU
+//RKANHENU DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKANHENU
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KANHENU
+// DD DISP=SHR,
+// DSN=ITM.ITE.RSPLEXL4.XKANHENU
+//********************************************************************
+//* TOM table and object definitions (ODI):
+//********************************************************************
+//UKANOSRC DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKANOSRC
+//RKANOSRC DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKANOSRC
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KANOSRC
+//UKANDATV DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKANDATV
+//RKANDATV DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..RKANDATV
+//********************************************************************
+//* TOM SQL query members:
+//********************************************************************
+//UKANSQL  DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..RKANSQLU
+//RKANSQL  DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..RKANSQLU
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KANSQL
+//******************************************************************
+//* SYSTCPD DD: TCPDATA override
+//******************************************************************
+//* Override this DD card to explicitly identify which dataset to
+//* use to obtain the parameters defined by TCPIP.DATA when no
+//* GLOBALTCPIPDATA statement is configured. Refer to the IP
+//* Configuration Guide for information on the TCPIP.DATA search
+//* order. TCPIP.SEZAINST(TCPDATA) is the default sample file.
+//* TCPIP.TCPPARMS(TCPDATA) is another sample and is created as
+//* part of the Installation Verification Program (IVP) for TCP/IP.
+//* To customize in PARMGEN mode:
+//* Override the following parameters and uncomment them out in the
+//* appropriate PARMGEN CONFIG profile member(s) referenced in the
+//* WCONFIG($SYSIN) prior to running the $PARSE or $PARSESV job.
+//* These profiles in WCONFIG library are typically:
+//* - $GBL$USR global PARMGEN CONFIG profile -or-
+//* - ITE1 PARMGEN CONFIG profile (in ICAT-to-PARMGEN conversion)
+//* o IBM-supplied defaults in WCONFIG($GBL$IBM) and WCONFIG($CFG$IBM):
+//* ==========================     ==============================
+//* PARMGEN CONFIG Parameter       Default PARMGEN CONFIG Value
+//* ==========================     ==============================
+//* GBL_DSN_TCP_SYSTCPD_TCPDATA    TCPIP.SEZAINST(TCPDATA)
+//* KAG_X_STC_SYSTCPD_INCLUDE_FLAG Y
+//*
+//* o Your customizations in WCONFIG($GBL$USR) and/or
+//*   WCONFIG(ITE1) LPAR profile:
+//* ========================    ==============================
+//* PARMGEN CONFIG Parameter    User PARMGEN CONFIG Value
+//* ========================    ==============================
+//* GBL_DSN_TCP_SYSTCPD_TCPDATA
+//* KAG_X_STC_SYSTCPD_INCLUDE_FLAG Y
+//******************************************************************
+//*SYSTCPD DD DISP=SHR,
+//* DSN=
+//********************************************************************
+//* TOM workspace definitions:
+//********************************************************************
+//UKANWENU DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKANWENU
+//RKANWENU DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKANWENU
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KANWENU
+// DD DISP=SHR,
+// DSN=ITM.ITE.RSPLEXL4.XKANWENU
+//********************************************************************
+//* TOM profiles and screen spaces libraries:
+//********************************************************************
+//RKOBPROF DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKOBDATF
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KOBDATF
+//RKOBPFSV DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKOBDATF
+//RKOBPROC DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKOBDATF
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KOBDATF
+//RKOBPCSV DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..UKOBDATF
+//********************************************************************
+//* TOM user defined DDNAMEs:
+//********************************************************************
+//******************************************************************
+//* Member: KOB$SST3
+//* Master Source: ITM.ITE.TKANSAM(KOBPRMLB)
+//* KCIJPUP1 or KCIJPCFG/KCIJPPRF Batch Job Output:
+//*   ITM.ITE.ITE1.IKANSAMU(KOB$SST3) - IBM Default
+//*   ITM.ITE.ITE1.WCONFIG(KOB$SST3)  - Customer Copy
+//* Purpose:
+//*   WCONFIG(KOB$SST3) addition DD override in the Tivoli OMEGAMON
+//*   (TOM) STC in WKANSAMU for OMEGAMON Enhanced 3270 User Interface
+//*   (OMEGAMON enhanced 3270UI) component.
+//* Instructions:
+//*   Add your additional DDNAME override(s) below, if any.  Or
+//*   uncomment them if there are placeholder parameters supplied by
+//*   default.  They will be imbedded in the TOM STC in WKANSAMU by
+//*   the $PARSE*-related "Create runtime members and jobs".
+//* *****************************************************************
+//* USER SECTION: OVERRIDE FOR ADD'L DD FOR ITE1TOM
+//* *****************************************************************
+//* ---------------- BEGIN - USER SECTION: OVERRIDE --------------- *
+//* ---------------- END   - USER SECTION: OVERRIDE --------------- *

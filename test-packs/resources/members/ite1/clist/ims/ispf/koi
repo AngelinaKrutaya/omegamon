@@ -1,0 +1,93 @@
+ /********************************************************************/
+ /* INSTALLATION AND CONFIGURATION ASSISTANCE TOOL                   */
+ /* LICENSED MATERIALS - PROPERTY OF IBM                             */
+ /* COPYRIGHT IBM CORP. 2004,2007. ALL RIGHTS RESERVED.              */
+ /*                                                                  */
+ /* US GOVERNMENT USERS RESTRICTED RIGHTS - USE, DUPLICATION OR      */
+ /* DISCLOSURE RESTRICTED BY GSA ADP SCHEDULE CONTRACT WITH IBM CORP.*/
+ /*                                                                  */
+ /*  PURPOSE:                                                        */
+ /*  SAMPLE CUSTOMIZATION CLIST TO INVOKE OMEGAMON II FOR IMS IN     */
+ /*               TSO MODE AND ISPF MODE                             */
+ /*                                                                  */
+ /*  ESTABLISH THE CLIST() VALUE BELOW TO REFLECT THE                */
+ /*  NAME OF THE DATASET THAT THE CUSTOMIZED SAMPLE                  */
+ /*  CLIST MEMBERS THAT WERE COPIED.                                 */
+ /*                                                                  */
+ /*  INPUT FIELDS:                                                   */
+ /*       OIAPPL  - THE TARGET OMEGAMON/PROD VTAM APPLICATION TO     */
+ /*                 START A SESSION WITH.                            */
+ /*       OIMID   - MIDDLE IDENTIFIER OF OMEGAMON II FOR IMS FILES   */
+ /*       OIPREFX - PREFIX OF OMEGAMON DATASET NAMES                 */
+ /*       OIUSER  - 2-DIGIT OXUSERXX SUFFIX                          */
+ /*       CLIST   - DATASET WHERE CUSTOM CLIST MEMBERS RESIDE        */
+ /*       XMOD    - ENTER LOW LEVEL NAME FOR PRODUCT SPECIFIC LOAD   */
+ /*                 LIBRARY.   THIS VALUE CAN BE TKANMOD OR RKANMOD. */
+ /*                 THE DEFAULT IS TKANMOD.                          */
+ /*       LROWS   - NUMBER OF LOGICAL ROWS FOR SCROLLING             */
+ /*                                                                  */
+ /*  NOTE: A CICAT CUSTOMIZED CLIST NAMED KOISPF IS LOCATED IN YOUR  */
+ /*       OMEGAMON II FOR IMS RUN-TIME SAMPLE LIBS FOR STANDARD      */
+ /*       TSO AND ISPF ACCESS SITUATIONS.  PLEASE REFER TO           */
+ /*       YOUR OMEGAMON II FOR IMS INSTALL MANUAL FOR DETAIL         */
+ /*       INSTRUCTIONS.                                              */
+ /*                                                                  */
+ /********************************************************************/
+ /*+-----------------------------------------------------------------*/
+ /*|                        C H A N G E   L O G                      */
+ /*|                          I2 V560                                */
+ /*|                                                                 */
+ /*|                 *** ADD NEW ENTRIES AT THE TOP ***              */
+ /*|                                                                 */
+ /*+-----------------------------------------------------------------*/
+ /*|FLAG|FIXID# |  DATE  |WHO| DESCRIPTION                           */
+ /*|----+-------+--------+---+---------------------------------------*/
+ /*|    |       |        |   |                                       */
+ /*|@001|OA22315|20070827|SPB|FIX CLIST TO PROPERLY REFERENCE VARS   */
+ /*|    |UA36582|        |   |PMR 50654,379,000                      */
+ /*|    |       |        |   |                                       */
+ /*|----+-------+--------+---+---------------------------------------*/
+ /*|FLAG|FIXID# |  DATE  |WHO| DESCRIPTION                           */
+ /*+-----------------------------------------------------------------*/
+
+         %KOISPFC PROD(IMS)                 +
+                 LROWS(255)                 +
+                 OIAPPL(ITE1OC0)            +
+               OIMID(ITM.ITE.BASE.RKANMOD)  +
+                 OIPREFX(ITM)               +
+                 OIUSER(/C)                 +
+                 DEBUG(N)                   +
+                 CLIST(ITM.ITE.QA.CLIST)    +
+                 XMOD(RKANMOD)
+
+         /*-----------------------------------------------------------*/
+         /*    DEFINE GLOBAL VARIABLES                                */
+         /*-----------------------------------------------------------*/
+
+         GLOBAL PRODUCT +
+                CLISTX  +
+                MODX    +
+                FSCRN   +
+                LROW#   +
+                SYSID   +
+                SNAPDS  +
+                DBUG    +
+                OMAPL   +
+                OMMIDN  +
+                OMPREF  +
+                OMUSR   +
+                CICSJN  +
+                OCAPL   +
+                OCMIDN  +
+                OCPREF  +
+                OCUSR   +
+                OIAPL   +
+                OIUSR   +
+                OIPREF  +
+                OIMIDN  +
+                DB2JN   +
+                O2APL   +
+                O2MIDN  +
+                O2PREF  +
+                O2USR
+

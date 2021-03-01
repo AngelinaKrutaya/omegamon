@@ -1,0 +1,4 @@
+# Empty Directories #
+#####################
+# resources/ used to store runtime resources
+!.gitignore

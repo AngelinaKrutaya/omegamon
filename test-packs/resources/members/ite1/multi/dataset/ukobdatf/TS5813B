@@ -1,0 +1,254 @@
+/*------------------------------------------------------------------*/
+/* Licensed Materials - Property of IBM                             */
+/* 5698-B49, 5698-A33, 5698-A34, 5698-A37, 5655-W37,                */
+/* 5655-W38                                                         */
+/* * Copyright Rocket Software Inc. 2012, 2019 All rights reserved  */
+/* Copyright IBM Corporation 2012-2019.  All rights reserved        */
+/*                                                                  */
+/* US Government Users Restricted Rights - Use, duplication or      */
+/* disclosure restricted by GSA ADP Schedule Contract with IBM Corp.*/
+/*-------------------------- UA69205 -------------------------------*/
+/********************************************************************/
+/*                                                                  */
+/*       OMEGAMON 3270 USER INTERFACE - IBM SUPPLIED DEFAULT        */
+/*                                                                  */
+/********************************************************************/
+/* ******************************************************************/
+/*                                                                  */
+/*-----+--------------------------------------------+----------+----*/
+/* NO. |           CHANGE DESCRIPTION               |   DATE   | ID */
+/*-----+--------------------------------------------+----------+----*/
+/* NEW | HKOB700                                    |          |MC0 */
+/* n/a | Specify KOBSTART as FIRSTWS DR#22660       | 12/2011  |sxs */
+/* n/a | Describe HUB specifications                | 01/2013  |sxs */
+/* n/a | Add Date, Time, Auto/Update, Trace, REORG  | 02/2013  |MC  */
+/*     | (IF1: APAR# OA42127, PTF# UA69205)         |          |    */
+/* n/a | Increased /*RESERVED Count                 | 09/2014  |MC  */
+/* n/a | Add APLGRAPHICS                            |02/18/2015|MC  */
+/* n/a | Add RANGE0-9 Colors and RV Attributes      |03/18/2015|MC  */
+/*     | - OB 730 vNext Phase 1 PTF                 |04/01/2015|    */
+/*     |   (APAR# OA46867, PTF# UA76751)            |          |    */
+/* n/a | Add SHOWLOGONMSG=NO                        |06/23/2015|MC  */
+/* n/a | Modify RV Settings for Range 0 Missing.    |07/16/2015|MC  */
+/*     | - OB 730 IF1 PTF                           |08/11/2015|    */
+/*     |   (APAR# OA48295, PTF# UA78382)            |          |    */
+/* n/a | Change to SHOWLOGONMSG=YES                 |08/05/2015|MC  */
+/* n/a | Increase HUBCHECKCYCLE from 3 to 10        |05/27/2016|MC  */
+/*     | - OB 730 IF3 PTF                           |07/05/2016|    */
+/*     |   (APAR# OA50563, PTF# UA82170)            |          |    */
+/* n/a | 1st workspace from KOBSTART to KOBSEVTS    |08/08/2016|MC  */
+/*     |   (APAR# OA51033, PTF# UAnnnnn)            |          |    */
+/* n/a | Add SHOWFILTERS=N                          |10/10/2016|MC  */
+/* n/a | Add ACTDEFAULT/=N                          |10/31/2016|MC  */
+/*     | - OB 730 IF4 PTF                           |11/17/2016|    */
+/*     |   (APAR# OA51564, PTF# UA83356)            |          |    */
+/* n/a | Add SHOWVERIFY and SHOWALERTS              |02/20/2018|MC  */
+/*     |   (APAR# OA54950, PTF# UAnnnnn)            |          |    */
+/* n/a | Add JESDDPRINT                             |09/04/2018|MC  */
+/*     |   (APAR# OA56290, PTF# AA56290)            |          |    */
+/* n/a | Change HUBCHECK 10,N to 5,Y                |12/06/2018|MC  */
+/*     |   (APAR# OA57133)                          |          |    */
+/*     |                                            |          |    */
+/*-----+--------------------------------------------+----------+----*/
+/*                                                                  */
+/********************************************************************/
+/*     DEFINE THE ITM DATA SOURCE INFORMATION                       */
+/********************************************************************/
+
+<CUADATA>
+
+SHOWVERIFY=N
+SHOWALERTS=N
+HUBNAME=HUB_WALDEVITMZQA01
+HUBANAME=HUB_WALDEVITMZQA01
+HUBAADDRESS=::ffff:10.117.154.103
+HUBAPORT=21001
+HUBBNAME=Unassigned
+HUBBADDRESS=Unassigned
+HUBBPORT=None
+HUBACTIVE=A
+HUBCHECKCYCLE=5
+HUBCHECKAONLY=Y
+
+/********************************************************************/
+/*     DEFINE INITIAL SESSION LOGON OPTIONS                         */
+/********************************************************************/
+
+<CUANAV>
+FIRSTWS=KOBSEVTS
+FIRSTNAV1=
+FIRSTNAV2=
+TRACE=N
+ISPFTABABAR=Y
+ISPFTABPNTS=Y
+ACTDEFAULT/=N
+
+HISTOPTION=2
+HISTLMINS=030
+HISTLHOUR=002
+
+/********************************************************************/
+/*     DEFINE LOCALE AND TIMING INFORMATION                         */
+/********************************************************************/
+
+<CUA>
+LOCALEID=ENUS
+DATEFORMAT=MM
+DATESEP=/
+TIMEFORMAT=24
+TIMESEP=:
+AUTOUPDATE=010
+AUTOSUSPEND=2880
+MAXTIMEOUT=000
+
+SHOWLOGONMSG=N
+SHOWFILTERS=N
+/* SHOWVERIFY=Y   @01 Removed Permanently
+/* SHOWALERTS=N   @01 Removed Permanently
+
+JESDDPRINT=SYSOUT1
+
+/********************************************************************/
+/*     DEFINE COLOR ASSIGNMENTS                                     */
+/********************************************************************/
+
+<CUACOLOR>
+BOXLINES=White
+MAINHEADER=Yellow
+SUBHEADER=Yellow
+COLHEADER=Turquoise
+TRAILER=Yellow
+ACTIONSELECT=White
+ACTIONBAR=Blue
+INPUT=Green
+PANELID=Blue
+ZOOMSELECT=White
+COMMANDLINE=Green
+KEYWORDS=Blue
+BODYTEXT=Turquoise
+PUSHBUTTONS=White
+
+APLGRAPHICS=FULL
+
+/********************************************************************/
+/*     DEFINE STATUS COLORIZATION                                   */
+/********************************************************************/
+
+<CUASTATUS>
+OKGOOD=Green
+WARNING=Yellow
+CRITICAL=Red
+IDLE=Blue
+HIGHLIGHT=Turquoise
+UNKNOWN=Blue
+
+SHOWOKGOOD=NO
+
+RANGE0=Blue
+RANGE1=Green
+RANGE2=Blue
+RANGE3=Turquoise
+RANGE4=White
+RANGE5=Yellow
+RANGE6=Pink
+RANGE7=Red
+RANGE8=Red
+RANGE9=Red
+
+RANGE0RV=N
+RANGE1RV=Y
+RANGE2RV=Y
+RANGE3RV=Y
+RANGE4RV=Y
+RANGE5RV=Y
+RANGE6RV=Y
+RANGE7RV=Y
+RANGE8RV=Y
+RANGE9RV=Y
+
+/********************************************************************/
+/*     WORKSPACE WIZARD SETTINGS @02 Added March 23 2020            */
+/********************************************************************/
+
+<STATUSTREE>
+FIRSTTREE=KOBSIT00
+TREELABEL="Enterprise Status"
+TREENAME=KOBSITU1
+TREEZOS=Y
+TREECICS=Y
+TREECTG=Y
+TREEIMS=Y
+TREEDB2=Y
+TREEMQ=Y
+TREEIIB=Y
+TREEMFN=Y
+TREESTOR=Y
+TREEJVM=Y
+TREEITM=Y
+TREEZVM=Y
+
+/********************************************************************/
+/*     FIRST WORKSPACE IMBED NAMES @03 Added April 08 2020          */
+/********************************************************************/
+
+<IMBEDNAMES>
+IMBEDZOS=KM5STRTI
+IMBEDCICS=KCPSTRTI
+IMBEDIMS=KIPSTRTI
+IMBEDDB2=KDPSTRTI
+IMBEDCTG=KGWSTRTI
+IMBEDMQ=KMQSTRTI
+IMBEDMFN=KN3STRTI
+IMBEDSTOR=KS3STRTI
+IMBEDJVM=KJJSTRTI
+
+/********************************************************************/
+/*     PLACEHOLDER FOR FUTURE PROFILE OPTIONS                       */
+/********************************************************************/
+
+HUBIPADDRESS=::ffff:10.117.154.103
+HUBPORTNUMBER=21001
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+/*RESERVED
+
+/********************************************************************/
+/*      END OF PROFILE DEFINITION                                   */
+/********************************************************************/

@@ -1,0 +1,161 @@
+//******************************************************************
+//* NAME: ITE1M2RC OMEGAMON CLASSIC REALTIME COLLECTOR
+//*
+//* PURPOSE: STARTED TASK PROCEDURE TO RUN A CLASSIC/REALTIME COLLECTOR
+//*  * THIS PROC IS CONFIGURED TO RUN THE FOLLOWING 3270 OMEGAMON:
+//*     IBM OMEGAMON for z/OS (Classic/Realtime Collector)
+//*
+//******************************************************************
+//* Last $PARSE* run refresh: OMCI version @ FMID HKM5550
+//******************************************************************
+//* Last PARMGEN maintenance refresh:
+//* ===================================================================
+//* PARMGEN Maintenance: FMID HKCI310 APAR OA56325 4Q18
+//* z/OS/ISPF Environment: z/OS:02.03.00 / ISPF:7.3
+//* ===================================================================
+//* Member: KCI$SST1
+//* Purpose:
+//*   WCONFIG(KCI$SST1) common PARMGEN accounting imbed is generated
+//*   in all ITE1* STCs in WKANSAMU
+//* Work Environment:
+//*   - WCONFIG: ITM.ITE.ITE1.WCONFIG
+//*   - WKANSAMU: ITM.ITE.ITE1.WKANSAMU
+//*   - GBL_USER_JCL: ITM.ITE.PARMGEN.JCL
+//*   - GBL_DSN_SYS1_PROCLIB: SYS1.PROCLIB
+//*   - GBL_TARGET_HILEV: ITM.ITE
+//* *****************************************************************
+//* USER SECTION: Edit WCONFIG(KCI$SST1) to customize user
+//*               accounting details accordingly.
+//* *****************************************************************
+//* ---------------- BEGIN - USER SECTION: OVERRIDE --------------- *
+//* Last updated by:
+//*TS5813GN JOB (ACCT),'KM2JPUPB - NAME',CLASS=A,
+//* MSGCLASS=X,MSGLEVEL=(1,1),NOTIFY=&SYSUID.,REGION=0M
+//***  0 0  RTE_NAME=ITE1 SYSMEMBER=KM2JPUPB
+//*** \_~_/ SYSJOBNAME=TS5813GN JOBPARM SYSAFF=RSD1
+//* SYSDATE: 2019/03/06
+//* ---------------- END   - USER SECTION: OVERRIDE --------------- *
+//******************************************************************
+//*
+//* NOTES:
+//* * TYPICAL SYMBOLIC PARAMETER VALUES ON THE PROC STATEMENT ARE:
+//*    SYS      = MID-LEVEL QUALIFIER OF RUNTIME ENVIRONMENT (RTE)
+//*    RHILEV   = HIGH-LEVEL QUALIFIER OF RUNTIME LIBRARIES
+//*               CONTAINING CUSTOMIZED MEMBERS
+//*    RVHILEV  = HIGH-LEVEL QUALIFIER OF RUNTIME VSAM DATASETS
+//*               NOTE: SOME STARTED TASKS DO NOT USE THIS SYMBOL
+//*    BASEHLEV = HIGH-LEVEL QUALIFIER OF READ-ONLY RUNTIME LIBRARIES
+//*               THIS PARAMETER HAS THE FOLLOWING FORMAT:
+//*               - "&thilev.T" (SMP/E TARGET) OR
+//*               - "&rhilev.&rtename.R" (BASE LIBRARIES FOR A
+//*                 FULL RTE OR A SHARING RTE)
+//*    DOUT     = DEBUGGING OUTPUT CLASS
+//*
+//* * LEGEND:
+//* o Your customizations in WCONFIG RTE and global profiles:
+//* ===============    =================== =====================
+//* STC PROC symbol    RTE profile parm.   Value
+//* ===============    =================== =====================
+//*                    RTE_TYPE            SHARING
+//* RHILEV             RTE_HILEV           ITM.ITE
+//* RVHILEV            RTE_VSAM_HILEV      ITM.ITE
+//* SYS                RTE_NAME            ITE1
+//* BASEHLEV (1st part)RTE_HILEV (Full RTE)ITM.ITE
+//* BASEHLEV (2nd part)RTE_NAME  (Full RTE)ITE1
+//* BASEHLEV (1st part)RTE_X_HILEV_SHARING ITM.ITE
+//* BASEHLEV (2nd part)RTE_SHARE           BASE
+//* BASEHLEV (SMPSHR)  GBL_TARGET_HILEV    ITM.ITE
+//******************************************************************
+//OMCI PROC RGN=0M,
+//          TIM=1440,
+//          SYS=ITE1,
+//          RHILEV=ITM.ITE,
+//          BASEHLEV=ITM.ITE.BASE.R,
+//          USERPARU=ITM.ITE.ITE1.RKANPARU,
+//          DOUT=X,
+//          APPL=ITE1M2RC,
+//*         PRTCT=,           << ** deprecated
+//*         PSWD=,               << ** deprecated
+//          UMAX=99,
+//          OM=KOBROUTR,
+//          PROD=KOMMVXXX,
+//          FSCR=,
+//          FOLD=Y,
+//          USR=/I,
+//          LROWS=3000
+//******************************************************************
+//* Specify "Y" to the RTE_X_STC_INAPF_INCLUDE_FLAG parameter in
+//* WCONFIG(ITE1) if you want the INAPF statement generated
+//* as uncommented out. ITE1APF member contains
+//* APF-authorization commands for libraries concatenated in the STC
+//* STEPLIB and RKANMODL DDNAMEs.  Review ITE1APF
+//* and ITE1STRT members for more information.
+//* Note: Operationally, the ITE1APF INCLUDE
+//*       member is called from SYS1.PROCLIB
+//*       as copied by the WKANSAMU(KCIJPSYS) job.
+//INAPF INCLUDE MEMBER=ITE1APF
+//******************************************************************
+//*
+//OMCI     EXEC PGM=KOBVTAM,
+//         REGION=&RGN,TIME=&TIM,
+//*        PARM=('APPL=&APPL,PRTCT=&PRTCT',  << **
+//*        'PSWD=&PSWD,UMAX=&UMAX,OM=&OM',      << **
+//         PARM=('APPL=&APPL',
+//         'UMAX=&UMAX,OM=&OM',
+//         'MEMBER=KOBVTAM',                        << **
+//         'PROD=&PROD,FSCR=&FSCR',
+//         'USER=&USR,FOLD=&FOLD',
+//         'LROWS=&LROWS')
+//STEPLIB  DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..RKANMODU
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KANMOD
+//RKANPAR  DD DISP=SHR,
+//         DSN=&USERPARU
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KANPAR
+//RKANHENU DD DISP=SHR,
+//         DSN=&BASEHLEV.KOMHELP
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KOBHELP
+//RKOMPROC DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..RKOMPCSV
+//         DD DISP=SHR,
+//         DSN=&BASEHLEV.KOMPROC
+//RKOMPCSV DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..RKOMPCSV
+//RKOMPROF DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..RKOMPFSV
+//         DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..RKOMPROF
+//RKOMPFSV DD DISP=SHR,
+//         DSN=&RHILEV..&SYS..RKOMPFSV
+//******************************************************************
+//* Member: KOM$SDMP
+//* Master Source: ITM.ITE.TKANSAM(KM5PRMLB)
+//* KCIJPUP1 Batch Job Output (PART 1):
+//*    ITM.ITE.ITE1.IKANSAMU(KOM$SDMP) - IBM Default Cop               y
+//* KCIJPUP1 Batch Job Output (PART 2):
+//*    ITM.ITE.ITE1.WCONFIG(KOM$SDMP)  - Customer Copy
+//******************************************************************
+//* Log-related DD:
+//******************************************************************
+//* ****************************************************************
+//* USER SECTION: Edit WCONFIG(KOM$SDMP) dump/log-related DD
+//*               imbedded in the ITE1M2RC
+//*               started task (STC). $PARSE* job imbeds this
+//*               member in the STC.
+//* Note: If you wish to have a SYSMDUMP DD instead of SYSUDUMP DD,
+//*       modify the DD and pre-allocate the dataset. A placeholder
+//*       DDNAME is provided as an example.  Refer to sample
+//*       KCIALOJB for sample allocation of a SYSMDUMP dataset.
+//*       Each STC requires a unique SYSMDUMP dataset.
+//* ****************************************************************
+//* ****************************************************************
+//* ---------------- BEGIN - USER SECTION: OVERRIDE -------------- *
+//SYSUDUMP DD SYSOUT=(&DOUT,,DUMP),FREE=CLOSE
+//*SYSMDUMP DD DISP=SHR,
+//* DSN=&RHILEV..&SYS..ITE1M2RC
+//ABNLIGNR DD DUMMY                  * TO TURN ABENDAID OFF *
+//* ---------------- END   - USER SECTION: OVERRIDE -------------- *
+//******************************************************************

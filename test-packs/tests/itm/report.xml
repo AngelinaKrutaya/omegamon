@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite errors="0" failures="0" hostname="ams-vm-ak14" name="pytest" skipped="0" tests="1" time="151.790" timestamp="2021-03-01T01:24:22.937634"><testcase classname="test_tep_take_action" name="test_no_kglumap_no_racf_profile" time="151.461" /></testsuite></testsuites>

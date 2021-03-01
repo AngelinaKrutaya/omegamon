@@ -1,0 +1,70 @@
+*
+*     START OBVTAM (OMEGAMON XE FOR DB2 PE IN VTAM MODE)
+*     UNDER THE COMMON INTERFACE.
+*
+*     VTAM MODE IS REQUIRED FOR TSO/ISPF MODE AND THE CUA INTERFACE.
+*
+*     APPL  - APPLID TO BE USED FOR LOGGING ONTO OBVTAM.
+*
+*     OM    - NAME OF THE OMEGAMON XE FOR DB2 PE MODULE THAT WILL
+*             BE INVOKED BY OBVTAM.  DO NOT CHANGE THIS PARAMETER
+*
+*     UMAX  - THE MAXIMUM NUMBER OF OBVTAM SESSIONS ALLOWED.
+*
+*   TIMEOUT - AMOUNT OF TIME TO WAIT BEFORE TERMINATING IDLE SESSIONS.
+*             0 - 99 MINUTES.  0 = NO TIMEOUT.
+*
+*     DB2   - THE DEFAULT DB2 SUBSYSTEM ID.
+*             THIS PARAMETER CAN BE OVERRIDDEN AT LOGON TIME.
+*
+*     USER  - THE DEFAULT USER PROFILE ID.
+*             THIS PARAMETER CAN BE OVERRIDDEN AT LOGON TIME.
+*
+*     DC    - THE DEFAULT DATA COMPRESSION OPTION.
+*             Y - TURNS ON DATA COMPRESSION, TO REDUCE 3270
+*                 DATA STREAM
+*             N - TURNS OFF DATA COMPRESSION
+*             THIS PARAMETER CAN BE OVERRIDDEN AT LOGON TIME.
+*
+*     LROWS - THE DEFAULT LOGICAL ROWS.
+*             ACTUAL PHYSICAL TERMINAL ROW SIZE UP TO 9999.
+*             THIS PARAMETER CAN BE OVERRIDDEN AT LOGON TIME.
+*
+*     AUP   - THE DEFAULT AUTOMATIC UPDATE OPTION
+*             Y - TURNS ON AUTOMATIC UPDATE
+*             N - TURNS OFF AUTOMATIC UPDATE
+*             THIS PARAMETER CAN BE OVERRIDDEN AT LOGON TIME.
+*
+*     TESTC - THE DB/EXPLAIN STARTED TASK NAME
+*
+*             NOTE: DB/EXPLAIN IS NOT SUPPORTED IN OMEGAMON XE
+*             FOR DB2 PE. THIS FIELD IS SET TO 'TESTC=NSUPPORT'.
+*
+*     FOLD  - SPECIFIES WHETHER (Y, THE DEFAULT) OR NOT (N)
+*             THE PASSWORD FOR SIGNING ON TO VTAM SHOULD BE
+*             FOLDED TO UPPERCASE.
+*
+*     TEMAX - THE MAXIMUM NUMBER OF DB/EXPLAIN CONCURRENT USERS
+*
+*             NOTE: DB/EXPLAIN IS NOT SUPPORTED IN OMEGAMON XE
+*             FOR DB2 PE. THIS FIELD IS SET TO 'TEMAX=1'.
+*
+*     MODE  - VTAM MODE.  DO NOT CHANGE THIS PARAMETER
+*
+*
+START OBVTAM  APPL=ITE1D2C,                                            X
+              OM=KO2OINTB,                                             X
+              TIMEOUT=0,                                               X
+              UMAX=99,                                                 X
+              DB2=NONE,                                                X
+              USER=#P,                                                 X
+              DC=N,                                                    X
+              LROWS=999,                                               X
+              AUP=N,                                                   X
+              TESTC=NSUPPORT,                                          X
+              FOLD=Y,                                                  X
+              TEMAX=1,                                                 X
+              MODE=IC1,                                                X
+              PASSPHRASE=PARTIAL,                                      X
+              SECCLASS=OMCANDLE,                                       X
+              SAFAPPL=CANDLE                                            

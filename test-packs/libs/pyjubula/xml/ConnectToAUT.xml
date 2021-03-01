@@ -1,0 +1,12 @@
+<org.eclipse.jubula.communication.internal.message.ConnectToAutMessage>
+    <m__messageId>
+        <m__sequenceNumber>{{message_number}}</m__sequenceNumber>
+        <m__timestamp>{{message_timestamp}}</m__timestamp>
+    </m__messageId>
+    <m__clientHostName>{{client_host}}</m__clientHostName>
+    <m__clientPort>{{client_port}}</m__clientPort>
+    <m__eventConfirmTimeOut>0</m__eventConfirmTimeOut>
+    <m__autId>
+        <m__executableName>{{aut_id}}</m__executableName>
+    </m__autId>
+</org.eclipse.jubula.communication.internal.message.ConnectToAutMessage>

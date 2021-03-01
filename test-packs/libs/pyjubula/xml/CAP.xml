@@ -1,0 +1,39 @@
+<org.eclipse.jubula.communication.internal.message.CAPTestMessage>
+    <m__messageId>
+        <m__sequenceNumber>{{message_number}}</m__sequenceNumber>
+        <m__timestamp>{{message_timestamp}}</m__timestamp>
+    </m__messageId>
+    <m__messageCap>
+        <m__ci class="org.eclipse.jubula.tools.internal.objects.ComponentIdentifier">
+            <m__supportedClassName>{{definition[0]}}</m__supportedClassName>
+            <m__componentClassName>{{definition[1]}}</m__componentClassName>
+            <m__hierarchyNames>{%
+                for item in definition[2] %}
+                <string>{{item}}</string>{%
+                endfor %}
+            </m__hierarchyNames>
+            <m__neighbours>{%
+                for item in definition[3] %}<string>{{item}}</string>{%
+                endfor %}
+            </m__neighbours>
+            <m__matchPercentage>-1.0</m__matchPercentage>
+            <m__numberOfOtherMatchingComponents>-1</m__numberOfOtherMatchingComponents>
+            <m__equalOriginalFound>false</m__equalOriginalFound>
+        </m__ci>
+        <m__method>{{action}}</m__method>
+        <m__messageParams>{%
+            for param in params %}
+            <org.eclipse.jubula.communication.internal.message.MessageParam>
+                <m__value>{{escape(str(param))}}</m__value>
+                <m__type>{%
+                    if str(type(param)) == "<class 'bool'>" %}java.lang.Boolean{%
+                    elif str(type(param)) == "<class 'int'>"%}java.lang.Integer{%
+                    else %}java.lang.String{%
+                    endif %}</m__type>
+            </org.eclipse.jubula.communication.internal.message.MessageParam>{%
+            endfor %}
+        </m__messageParams>
+        <m__hasDefaultMapping>{{default_mapping}}</m__hasDefaultMapping>
+    </m__messageCap>
+    <m__requestAnswer>true</m__requestAnswer>
+</org.eclipse.jubula.communication.internal.message.CAPTestMessage>
